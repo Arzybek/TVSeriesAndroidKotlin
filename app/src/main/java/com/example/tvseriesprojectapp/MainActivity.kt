@@ -6,6 +6,10 @@ import android.support.constraint.ConstraintLayout
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,9 +19,16 @@ class MainActivity : AppCompatActivity() {
         val layout = findViewById<ConstraintLayout>(R.id.root)
 
         val textView = TextView(this)
-        //setting height and width
         textView.layoutParams = ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        textView.setText("GEEKSFORGEEKS")
+        val queue = Volley.newRequestQueue(this)
+        val url = "http://192.168.0.109:8080/tvshows"
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            Response.Listener<String> { response ->
+                textView.text = "Response is: ${response}"
+            },
+            Response.ErrorListener { response -> textView.text = "${response.message}" })
+        queue.add(stringRequest)
         layout?.addView(textView)
     }
 }
