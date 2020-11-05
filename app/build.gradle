@@ -9,7 +9,7 @@ android {
     buildToolsVersion "29.0.1"
     defaultConfig {
         applicationId "com.example.tvseriesprojectapp"
-        minSdkVersion 22
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -20,6 +20,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+}
+
+kotlin {
+    experimental {
+        coroutines 'enable'
     }
 }
 
@@ -34,4 +40,7 @@ dependencies {
 //    runtime group: 'khttp', name: 'khttp', version: '1.0.0'
     compile 'com.google.code.gson:gson:2.8.2'
     implementation 'com.android.volley:volley:1.1.1'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.24.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.24.0"
 }
