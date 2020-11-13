@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TVSeries project APP</string>
+    <string name="header">TVSerias</string>
+    <string name="your_login">Your login:</string>
+    <string name="your_password">Your password:</string>
+    <string name="login">Login</string>
 </resources>

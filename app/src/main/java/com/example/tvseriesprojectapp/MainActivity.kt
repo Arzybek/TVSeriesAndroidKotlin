@@ -13,7 +13,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
 class MainActivity : AppCompatActivity() {
-    val ip = "192.168.0.103" // 109 - laptop, 103 - pc
+    val ip = "172.17.98.49" // 109 - laptop, 103 - pc
     val port = "8080"
 
     override fun onCreate(savedInstanceState: Bundle?) {
