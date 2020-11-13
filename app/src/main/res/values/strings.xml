@@ -4,4 +4,7 @@
     <string name="your_login">Your login:</string>
     <string name="your_password">Your password:</string>
     <string name="login">Login</string>
+    <string name="logout">logout</string>
+    <string name="list">all</string>
+    <string name="profile">profile</string>
 </resources>
