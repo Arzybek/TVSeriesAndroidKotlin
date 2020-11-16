@@ -9,6 +9,10 @@
         android:icon="@android:drawable/ic_dialog_dialer"
         android:title="@string/list" />
     <item
+            android:id="@+id/action_login"
+            android:icon="@android:drawable/ic_dialog_email"
+            android:title="@string/login" />
+    <item
         android:id="@+id/action_mail"
         android:icon="@android:drawable/ic_dialog_email"
         android:title="@string/logout" />

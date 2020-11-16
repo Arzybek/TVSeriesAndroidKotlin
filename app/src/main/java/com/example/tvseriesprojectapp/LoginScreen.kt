@@ -1,19 +1,56 @@
 package com.example.tvseriesprojectapp
 
 import android.content.Intent
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
+import com.example.tvseriesprojectapp.common.HTTPHandler
+import com.example.tvseriesprojectapp.common.RSA
 import com.example.tvseriesprojectapp.user.User
+import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+
+
+
+
+
 
 class LoginScreen : AppCompatActivity(), View.OnClickListener{
 
+    private var rsa:String = ""
+    private var URL:String = ""
+    private var cookieJWT:String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val ip = "172.17.98.49" // 109 - laptop, 103 - pc
+        val port = "8080"
+        val url = "http://${ip}:${port}/tvshows/register"
+        this.URL = url
+
+        doAsync {
+            val result = java.net.URL(url).readText()
+            rsa = result
+        }
+
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_screen)
+
+    }
+
+    fun login(v:View){
+        if (v != null) {
+            when (v.id) {
+                R.id.loginButton -> loginPressed()
+            }
+        }
     }
 
     override fun onClick(v: View?) {
@@ -45,6 +82,14 @@ class LoginScreen : AppCompatActivity(), View.OnClickListener{
     private fun tryLogin(login: String, password: String) : Boolean {
         //ToDo implement login with dataBase connect
         //ToDo за одно прокинь сюда роль юзер или админ Session.role = Role.valueOf("user or admin")
-        return "PesGospoda" == login && "228" == password
+        //TODO закодить в RSA
+        val text = login+":"+password
+        val publicRsaKey = RSA.getPublicKey(rsa)
+        val encrypted = RSA.encrypt(text, publicRsaKey)
+        val sender = HTTPHandler(url = URL);
+        this.cookieJWT = sender.sendPostRequest(encrypted)
+
+
+        return true
     }
 }

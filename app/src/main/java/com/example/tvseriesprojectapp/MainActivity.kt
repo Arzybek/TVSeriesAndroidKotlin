@@ -21,6 +21,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         root.layoutManager = LinearLayoutManager(this)
 
+        bottom_navigation.setOnNavigationItemSelectedListener{
+            when (it.itemId){
+                R.id.action_login->switchToLoginScreen()
+                R.id.action_mail->switchToLoginScreen()
+                else -> switchToLoginScreen()
+            }
+        }
+
         val url = "http://${ip}:${port}/tvshows"
         var resp: String = "";
 //      val str: String = "[{\"id\":1,\"name\":\"Everybody hates Chris\",\"category\":\"comedy\",\"year\":2005},{\"id\":2,\"name\":\"Friends\",\"category\":\"comedy\",\"year\":1994}]";
@@ -40,6 +48,13 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(android.R.string.ok) { _, _ -> }
             .setIcon(android.R.drawable.ic_dialog_alert).show()
         }
+    }
+
+
+    private fun switchToLoginScreen():Boolean
+    {
+        setContentView(R.layout.activity_login_screen)
+        return true
     }
 
     private fun isNetworkConnected(): Boolean {
