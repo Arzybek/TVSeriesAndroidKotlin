@@ -1,32 +1,37 @@
-package com.example.tvseriesprojectapp
+package com.example.tvseriesprojectapp.fragments
 
 import android.content.Intent
-import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import com.example.tvseriesprojectapp.MainActivity
+import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.common.HTTPHandler
 import com.example.tvseriesprojectapp.common.RSA
 import com.example.tvseriesprojectapp.user.User
-import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
 
-
-
-
-
-class LoginScreen :AppCompatActivity(), View.OnClickListener{
+/**
+ * A simple [Fragment] subclass.
+ * Use the [loginFragment.newInstance] factory method to
+ * create an instance of this fragment.
+ */
+class loginFragment : Fragment() {
 
     private var rsa:String = ""
     private var URL:String = ""
     private var cookieJWT:String = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -42,9 +47,17 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
 
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login_screen)
 
     }
+
+
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_login, container, false)
+    }
+
 
     fun login(v:View){
         if (v != null) {
@@ -54,7 +67,7 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
         }
     }
 
-    override fun onClick(v: View?) {
+    fun onClick(v: View?) {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton -> loginPressed()
@@ -65,17 +78,17 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
     private fun loginPressed() {
         Log.d("Login", "Try login")
 
-        val loginText: EditText = findViewById<EditText>(R.id.login)
-        val passwordText: EditText = findViewById<EditText>(R.id.password)
+        val loginText: EditText = view!!.findViewById<EditText>(R.id.login)
+        val passwordText: EditText = view!!.findViewById<EditText>(R.id.password)
         if (tryLogin(loginText.text.toString(), passwordText.text.toString())) {
             Log.i("Login", "Login was successful")
             User.name = loginText.text.toString()
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(view!!.context, MainActivity::class.java))
         } else {
             Log.i("Login", "Login was failed")
             loginText.setText("")
             passwordText.setText("")
-            val toast: Toast = Toast.makeText(this, "Login failed.", Toast.LENGTH_LONG);
+            val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
             toast.show()
         }
     }
@@ -92,5 +105,25 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
 
 
         return true
+    }
+
+    companion object {
+        /**
+         * Use this factory method to create a new instance of
+         * this fragment using the provided parameters.
+         *
+         * @param param1 Parameter 1.
+         * @param param2 Parameter 2.
+         * @return A new instance of fragment loginFragment.
+         */
+        // TODO: Rename and change types and number of parameters
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) =
+                loginFragment().apply {
+                    arguments = Bundle().apply {
+                        putString(ARG_PARAM1, param1)
+                        putString(ARG_PARAM2, param2)
+                    }
+                }
     }
 }
