@@ -10,7 +10,9 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.widget.Toast
 import com.example.tvseriesprojectapp.fragments.loginFragment
+import com.example.tvseriesprojectapp.fragments.profileFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -24,12 +26,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         root.layoutManager = LinearLayoutManager(this)
 
-        val loginFragment = loginFragment()
+        val loginFrag = loginFragment()
+        val profileFrag = profileFragment()
 
         bottom_navigation.setOnNavigationItemSelectedListener{
             when (it.itemId){
-                R.id.action_login->makeCurrentFragment(loginFragment)
-                R.id.action_mail->makeCurrentFragment(loginFragment)
+                R.id.action_login->makeCurrentFragment(loginFrag)
+                R.id.action_mail->makeCurrentFragment(profileFrag)
                 else -> 1==1
             }
             true
@@ -56,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onClick(v: View?) {// этот метод в логине вызывается здесь а должен из логинскрина
+    fun onClick(v: View?) {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton -> 1==1

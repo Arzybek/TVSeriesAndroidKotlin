@@ -26,7 +26,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [loginFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class loginFragment : Fragment() {
+class loginFragment : Fragment(), View.OnClickListener{
 
     private var rsa:String = ""
     private var URL:String = ""
@@ -55,6 +55,7 @@ class loginFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_login, container, false)
     }
 
@@ -67,7 +68,7 @@ class loginFragment : Fragment() {
         }
     }
 
-    fun onClick(v: View?) {
+    override fun onClick(v: View?) {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton -> loginPressed()
