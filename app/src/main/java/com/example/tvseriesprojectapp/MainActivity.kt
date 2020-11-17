@@ -19,7 +19,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
 class MainActivity : AppCompatActivity() {
-    val ip = "172.17.98.49" // 109 - laptop, 103 - pc
+    val ip = "192.168.56.1" // 109 - laptop, 103 - pc
     val port = "8080"
     val loginFrag = loginFragment()
     val profileFrag = profileFragment()

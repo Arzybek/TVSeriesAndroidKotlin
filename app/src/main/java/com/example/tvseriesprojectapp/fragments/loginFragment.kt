@@ -3,6 +3,7 @@ package com.example.tvseriesprojectapp.fragments
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -32,16 +33,17 @@ class loginFragment : Fragment(), View.OnClickListener{
     private var URL:String = ""
     private var cookieJWT:String = ""
 
+    private var ip = "192.168.56.1"
+    private var port = "8080"
+    private var url = "http://${ip}:${port}/register"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val ip = "172.17.98.49" // 109 - laptop, 103 - pc
-        val port = "8080"
-        val url = "http://${ip}:${port}/tvshows/register"
-        this.URL = url
 
         doAsync {
             val result = java.net.URL(url).readText()
+            Log.i("Login_rsa_request", result)
             rsa = result
         }
 
@@ -72,8 +74,7 @@ class loginFragment : Fragment(), View.OnClickListener{
         Log.d("Login", "Try login from loginfrag")
         if (v != null) {
             when (v.id) {
-                R.id.loginButton -> Toast.makeText(view!!.context, "Logging in.", Toast.LENGTH_LONG).show()
-                //R.id.loginButton -> loginPressed()
+                R.id.loginButton -> loginPressed()
             }
         }
     }
@@ -83,10 +84,13 @@ class loginFragment : Fragment(), View.OnClickListener{
 
         val loginText: EditText = view!!.findViewById<EditText>(R.id.login)
         val passwordText: EditText = view!!.findViewById<EditText>(R.id.password)
+        Log.i("login", "data: "+loginText.text.toString()+passwordText.text.toString())
         if (tryLogin(loginText.text.toString(), passwordText.text.toString())) {
             Log.i("Login", "Login was successful")
             User.name = loginText.text.toString()
-            startActivity(Intent(view!!.context, MainActivity::class.java))
+            val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
+            toast.show()
+            startActivity(Intent(view!!.context, MainActivity::class.java))// здесь возможно стоит как то научиться перебрасывать на фрагмент профиля
         } else {
             Log.i("Login", "Login was failed")
             loginText.setText("")
@@ -100,8 +104,20 @@ class loginFragment : Fragment(), View.OnClickListener{
         //ToDo implement login with dataBase connect
         //ToDo за одно прокинь сюда роль юзер или админ Session.role = Role.valueOf("user or admin")
         //TODO закодить в RSA
+
+        Log.i("Login", url)
+
         val text = login+":"+password
+
+        Log.i("Login", text)
+        Log.i("Login", rsa)
+
+
+        return true// RSA пока что коряво работает, надо фиксить
+
         val publicRsaKey = RSA.getPublicKey(rsa)
+
+
         val encrypted = RSA.encrypt(text, publicRsaKey)
         val sender = HTTPHandler(url = URL);
         this.cookieJWT = sender.sendPostRequest(encrypted)
