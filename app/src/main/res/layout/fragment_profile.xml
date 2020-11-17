@@ -13,7 +13,7 @@
         android:text="@string/hello_blank_fragment" />
 
     <Button
-        android:id="@+id/loginButton"
+        android:id="@+id/profileButton"
         android:onClick="onClick"
         android:clickable="true"
         android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
         android:paddingTop="30dp"
         android:paddingEnd="150dp"
         android:paddingBottom="30dp"
-        android:text="@string/login"
+        android:text="@string/profile"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

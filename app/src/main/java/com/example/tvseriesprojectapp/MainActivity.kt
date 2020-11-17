@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.example.tvseriesprojectapp.fragments.loginFragment
@@ -20,14 +21,13 @@ import org.jetbrains.anko.uiThread
 class MainActivity : AppCompatActivity() {
     val ip = "172.17.98.49" // 109 - laptop, 103 - pc
     val port = "8080"
+    val loginFrag = loginFragment()
+    val profileFrag = profileFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        root.layoutManager = LinearLayoutManager(this)
-
-        val loginFrag = loginFragment()
-        val profileFrag = profileFragment()
+        //root.layoutManager = LinearLayoutManager(this)
 
         bottom_navigation.setOnNavigationItemSelectedListener{
             when (it.itemId){
@@ -60,9 +60,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClick(v: View?) {
+        Log.d("Login", "Try login from main")
         if (v != null) {
             when (v.id) {
-                R.id.loginButton -> 1==1
+                R.id.loginButton -> loginFrag.onClick(v)
+                R.id.profileButton -> profileFrag.onClick(v)
             }
         }
     }

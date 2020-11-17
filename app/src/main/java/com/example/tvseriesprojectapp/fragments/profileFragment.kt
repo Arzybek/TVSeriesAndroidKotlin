@@ -2,9 +2,11 @@ package com.example.tvseriesprojectapp.fragments
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.example.tvseriesprojectapp.R
 
 // TODO: Rename parameter arguments, choose names that match
@@ -39,6 +41,10 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(view:View){
+        Log.i("Login", "login tapped")
+
+        val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
+        toast.show()
 
     }
 

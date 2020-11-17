@@ -55,6 +55,8 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
     }
 
     override fun onClick(v: View?) {
+        val toast: Toast = Toast.makeText(this, "Trying to login.", Toast.LENGTH_LONG);
+        toast.show()
         if (v != null) {
             when (v.id) {
                 R.id.loginButton -> loginPressed()

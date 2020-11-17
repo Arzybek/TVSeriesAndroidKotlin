@@ -69,9 +69,11 @@ class loginFragment : Fragment(), View.OnClickListener{
     }
 
     override fun onClick(v: View?) {
+        Log.d("Login", "Try login from loginfrag")
         if (v != null) {
             when (v.id) {
-                R.id.loginButton -> loginPressed()
+                R.id.loginButton -> Toast.makeText(view!!.context, "Logging in.", Toast.LENGTH_LONG).show()
+                //R.id.loginButton -> loginPressed()
             }
         }
     }
