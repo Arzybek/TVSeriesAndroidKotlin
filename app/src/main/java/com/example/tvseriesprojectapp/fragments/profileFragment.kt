@@ -20,6 +20,7 @@ import io.ktor.http.Cookie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -70,7 +71,7 @@ class profileFragment : Fragment(), View.OnClickListener {
 
 
 
-        GlobalScope.launch(Dispatchers.IO) {
+        runBlocking(Dispatchers.IO) {
             data = client.get<String>(url)
             Log.i("aaa", data)
         }
@@ -80,7 +81,7 @@ class profileFragment : Fragment(), View.OnClickListener {
         Log.i("JWT", jwt)
 
         val textView = view!!.findViewById<TextView>(R.id.profileLabel)
-        if (data.equals("null"))
+        if (data.equals(""))
             textView.setText("nologin")
         else
             textView.setText(data)
@@ -95,7 +96,7 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(view:View){
-        Log.i("Login", "login tapped")
+        Log.i("Profile", "login tapped")
 
         val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
         toast.show()

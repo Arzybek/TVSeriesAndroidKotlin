@@ -19,9 +19,7 @@ import io.ktor.client.features.cookies.addCookie
 import io.ktor.client.features.cookies.cookies
 import io.ktor.client.request.post
 import io.ktor.http.Cookie
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -91,8 +89,6 @@ class loginFragment : Fragment(), View.OnClickListener{
     }
 
     private fun loginPressed() {
-        Log.d("Login", "Try login")
-
         val loginText: EditText = view!!.findViewById<EditText>(R.id.login)
         val passwordText: EditText = view!!.findViewById<EditText>(R.id.password)
         Log.i("login", "data: "+loginText.text.toString()+passwordText.text.toString())
@@ -117,12 +113,12 @@ class loginFragment : Fragment(), View.OnClickListener{
         //ToDo за одно прокинь сюда роль юзер или админ Session.role = Role.valueOf("user or admin")
         //TODO закодить в RSA
 
-        Log.i("Login", url)
+        Log.i("Login", "url: "+url)
 
         val logPass = login+":"+password
 
-        Log.i("Login", logPass)
-        Log.i("Login", rsa)
+        Log.i("Login", "LogPass: "+logPass)
+        //Log.i("Login", rsa)
 
         val client = HttpClient(){
             install(HttpCookies) {
@@ -140,12 +136,16 @@ class loginFragment : Fragment(), View.OnClickListener{
         var data = ""
 
 
-        GlobalScope.launch(Dispatchers.IO) {
+        runBlocking (Dispatchers.IO) {
             var aaa = client.cookies(url)
-            Log.i("aaa", aaa[0].toString())
+            Log.i("Login", "login cookie: "+aaa[0].toString())
             data = client.post<String>(url)
-            Log.i("aaa", data)
+            Log.i("Login", "data: "+data)
         }
+
+
+
+
         this.cookieJWT = data
 
 
@@ -154,7 +154,7 @@ class loginFragment : Fragment(), View.OnClickListener{
         //val encrypted = RSA.encrypt(text, publicRsaKey)
         //this.cookieJWT = sender.sendPostRequest(text)
 
-        Log.i("Login", cookieJWT)
+        Log.i("Login", "Cookie JWT: "+cookieJWT)
 
         (activity as MainActivity?)?.setJWT(data)
 
