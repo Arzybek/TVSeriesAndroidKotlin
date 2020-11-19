@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     val port = "8080"
     val loginFrag = loginFragment()
     val profileFrag = profileFragment()
+    var jwtCookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun makeCurrentFragment(fragment: Fragment) = supportFragmentManager.beginTransaction().apply {
+    fun makeCurrentFragment(fragment: Fragment) = supportFragmentManager.beginTransaction().apply {
         replace(R.id.fl_wrapper, fragment)
         commit()
     }
@@ -86,5 +87,16 @@ class MainActivity : AppCompatActivity() {
         val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
         return networkCapabilities != null &&
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+
+    public fun setJWT(jwt:String)
+    {
+        this.jwtCookie = jwt;
+    }
+
+    public fun getJWT():String
+    {
+        return this.jwtCookie;
     }
 }

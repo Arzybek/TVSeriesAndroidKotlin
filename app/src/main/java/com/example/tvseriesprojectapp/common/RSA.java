@@ -55,7 +55,7 @@ public class RSA {
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static PublicKey getPublicKey(String base64PublicKey){
+    public static PublicKey getPublicKeyBase(String base64PublicKey){
         PublicKey publicKey = null;
         try{
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(base64PublicKey.getBytes()));
@@ -69,7 +69,12 @@ public class RSA {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static PrivateKey getPrivateKey(String base64PrivateKey){
+    public static PublicKey getPublicKey(String pubKey){
+        return getPublicKeyBase(Base64.getEncoder().encodeToString(pubKey.getBytes()));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static PrivateKey getPrivateKeyBase(String base64PrivateKey){
         PrivateKey privateKey = null;
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64PrivateKey.getBytes()));
         KeyFactory keyFactory = null;

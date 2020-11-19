@@ -3,7 +3,6 @@ package com.example.tvseriesprojectapp.fragments
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,10 +11,17 @@ import android.widget.EditText
 import android.widget.Toast
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
-import com.example.tvseriesprojectapp.common.HTTPHandler
-import com.example.tvseriesprojectapp.common.RSA
 import com.example.tvseriesprojectapp.user.User
-import org.jetbrains.anko.doAsync
+import io.ktor.client.HttpClient
+import io.ktor.client.features.cookies.AcceptAllCookiesStorage
+import io.ktor.client.features.cookies.HttpCookies
+import io.ktor.client.features.cookies.addCookie
+import io.ktor.client.features.cookies.cookies
+import io.ktor.client.request.post
+import io.ktor.http.Cookie
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -35,17 +41,18 @@ class loginFragment : Fragment(), View.OnClickListener{
 
     private var ip = "192.168.56.1"
     private var port = "8080"
-    private var url = "http://${ip}:${port}/register"
+    private var url = "http://${ip}:${port}/register/insecure"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
+        //пока что RSA не работает, шлем в открытую логин пароль
 
-        doAsync {
+        /*doAsync {
             val result = java.net.URL(url).readText()
             Log.i("Login_rsa_request", result)
             rsa = result
-        }
+        }*/
 
 
         super.onCreate(savedInstanceState)
@@ -90,7 +97,8 @@ class loginFragment : Fragment(), View.OnClickListener{
             User.name = loginText.text.toString()
             val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
             toast.show()
-            startActivity(Intent(view!!.context, MainActivity::class.java))// здесь возможно стоит как то научиться перебрасывать на фрагмент профиля
+            (activity as MainActivity?)?.makeCurrentFragment(profileFragment())
+            //startActivity(Intent(view!!.context, MainActivity::class.java))// здесь возможно стоит как то научиться перебрасывать на фрагмент профиля
         } else {
             Log.i("Login", "Login was failed")
             loginText.setText("")
@@ -107,21 +115,44 @@ class loginFragment : Fragment(), View.OnClickListener{
 
         Log.i("Login", url)
 
-        val text = login+":"+password
+        val logPass = login+":"+password
 
-        Log.i("Login", text)
+        Log.i("Login", logPass)
         Log.i("Login", rsa)
 
+        val client = HttpClient(){
+            install(HttpCookies) {
+                // Will keep an in-memory map with all the cookies from previous requests.
+                storage = AcceptAllCookiesStorage()
 
-        return true// RSA пока что коряво работает, надо фиксить
+                // Will ignore Set-Cookie and will send the specified cookies.
+                GlobalScope.launch(Dispatchers.IO) {
+                    storage.addCookie(url, Cookie("register", logPass))
+                }
+                //storage = ConstantCookiesStorage(Cookie("register", logPass))
+            }
+        }
 
-        val publicRsaKey = RSA.getPublicKey(rsa)
+        var data = ""
 
 
-        val encrypted = RSA.encrypt(text, publicRsaKey)
-        val sender = HTTPHandler(url = URL);
-        this.cookieJWT = sender.sendPostRequest(encrypted)
+        GlobalScope.launch(Dispatchers.IO) {
+            var aaa = client.cookies(url)
+            Log.i("aaa", aaa[0].toString())
+            data = client.post<String>(url)
+            Log.i("aaa", data)
+        }
+        this.cookieJWT = data
 
+
+        //val publicRsaKey = RSA.getPublicKey(rsa)
+
+        //val encrypted = RSA.encrypt(text, publicRsaKey)
+        //this.cookieJWT = sender.sendPostRequest(text)
+
+        Log.i("Login", cookieJWT)
+
+        (activity as MainActivity?)?.setJWT(data)
 
         return true
     }
