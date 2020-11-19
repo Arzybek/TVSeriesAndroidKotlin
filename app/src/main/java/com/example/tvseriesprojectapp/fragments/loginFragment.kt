@@ -39,12 +39,16 @@ class loginFragment : Fragment(), View.OnClickListener{
     private var URL:String = ""
     private var cookieJWT:String = ""
 
-    private var ip = "192.168.56.1"
-    private var port = "8080"
+    private var ip = ""
+    private var port = ""
     private var url = "http://${ip}:${port}/register/insecure"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        this.ip = (activity as MainActivity?)?.ip!!
+        this.port = (activity as MainActivity?)?.port!!
+        this.url = "http://${ip}:${port}/register/insecure"
 
         //пока что RSA не работает, шлем в открытую логин пароль
 
@@ -97,7 +101,7 @@ class loginFragment : Fragment(), View.OnClickListener{
             User.name = loginText.text.toString()
             val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
             toast.show()
-            (activity as MainActivity?)?.makeCurrentFragment(profileFragment())
+            (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
             //startActivity(Intent(view!!.context, MainActivity::class.java))// здесь возможно стоит как то научиться перебрасывать на фрагмент профиля
         } else {
             Log.i("Login", "Login was failed")

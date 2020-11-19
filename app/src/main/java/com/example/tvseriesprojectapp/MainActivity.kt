@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity() {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton -> loginFrag.onClick(v)
-                R.id.profileButton -> profileFrag.onClick(v)
             }
         }
     }
@@ -73,6 +72,15 @@ class MainActivity : AppCompatActivity() {
 
     fun makeCurrentFragment(fragment: Fragment) = supportFragmentManager.beginTransaction().apply {
         replace(R.id.fl_wrapper, fragment)
+        commit()
+    }
+
+    fun makeCurrentFragment(fragmentTag: String) = supportFragmentManager.beginTransaction().apply {
+        when (fragmentTag){
+            "loginFragment"-> replace(R.id.fl_wrapper, loginFrag)
+            "profileFragment"->replace(R.id.fl_wrapper, profileFrag)
+        }
+        //replace(R.id.fl_wrapper, fragment)
         commit()
     }
 
@@ -90,12 +98,12 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    public fun setJWT(jwt:String)
+    fun setJWT(jwt:String)
     {
         this.jwtCookie = jwt;
     }
 
-    public fun getJWT():String
+    fun getJWT():String
     {
         return this.jwtCookie;
     }

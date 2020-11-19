@@ -12,20 +12,15 @@
         android:layout_height="match_parent"
         android:text="@string/hello_blank_fragment" />
 
-    <Button
-        android:id="@+id/profileButton"
-        android:onClick="onClick"
-        android:clickable="true"
+    <TextView
+        android:id="@+id/profileLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="200dp"
-        android:paddingStart="150dp"
-        android:paddingTop="30dp"
-        android:paddingEnd="150dp"
-        android:paddingBottom="30dp"
-        android:text="@string/profile"
-        android:textSize="25sp"
+        android:layout_marginStart="88dp"
+        android:layout_marginTop="92dp"
+        android:text="no_profile"
+        android:textColor="@color/colorPrimary"
+        android:textSize="45sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

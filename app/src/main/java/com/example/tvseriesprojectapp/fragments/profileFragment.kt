@@ -6,8 +6,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
+import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
+import io.ktor.client.HttpClient
+import io.ktor.client.features.cookies.AcceptAllCookiesStorage
+import io.ktor.client.features.cookies.HttpCookies
+import io.ktor.client.features.cookies.addCookie
+import io.ktor.client.request.get
+import io.ktor.http.Cookie
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -24,12 +37,53 @@ class profileFragment : Fragment(), View.OnClickListener {
     private var param1: String? = null
     private var param2: String? = null
 
+    private var ip = ""
+    private var port = ""
+    private var url = "http://${ip}:${port}/register/insecure"
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+
+        this.ip = (activity as MainActivity?)?.ip!!
+        this.port = (activity as MainActivity?)?.port!!
+        this.url = "http://${ip}:${port}/profile"
+
+    }
+
+    override fun onResume(){
+        super.onResume()
+
+        var aa = activity.toString()
+        Log.i("prof", aa)
+        var jwt = (activity as MainActivity?)?.getJWT()!!
+        val client = HttpClient(){
+            install(HttpCookies) {
+                storage = AcceptAllCookiesStorage()
+                GlobalScope.launch(Dispatchers.IO) {
+                    storage.addCookie(url, Cookie("auth", jwt))
+                }
+            }
         }
+
+        var data = ""
+
+
+
+        GlobalScope.launch(Dispatchers.IO) {
+            data = client.get<String>(url)
+            Log.i("aaa", data)
+        }
+
+        Log.i("prof", "hello")
+        Log.i("profaaa", data)
+        Log.i("JWT", jwt)
+
+        val textView = view!!.findViewById<TextView>(R.id.profileLabel)
+        if (data.equals("null"))
+            textView.setText("nologin")
+        else
+            textView.setText(data)
     }
 
     override fun onCreateView(
