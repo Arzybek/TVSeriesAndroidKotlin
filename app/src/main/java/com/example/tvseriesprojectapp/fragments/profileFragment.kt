@@ -7,10 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Klaxon
+import com.beust.klaxon.Parser
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
+import com.example.tvseriesprojectapp.UserProfile
+import com.example.tvseriesprojectapp.user.User
+import com.squareup.picasso.Picasso
 import io.ktor.client.HttpClient
 import io.ktor.client.features.cookies.AcceptAllCookiesStorage
 import io.ktor.client.features.cookies.HttpCookies
@@ -21,22 +28,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.lang.Exception
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [profileFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class profileFragment : Fragment(), View.OnClickListener {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
 
     private var ip = ""
     private var port = ""
@@ -76,16 +72,48 @@ class profileFragment : Fragment(), View.OnClickListener {
             Log.i("aaa", data)
         }
 
-        Log.i("prof", "hello")
-        Log.i("profaaa", data)
+        Log.i("profile", data)
         Log.i("JWT", jwt)
 
-        val textView = view!!.findViewById<TextView>(R.id.profileLabel)
+
         if (data.equals(""))
-            textView.setText("nologin")
+            drawNoUser()
         else
-            textView.setText(data)
+            drawUser(data)
     }
+
+    private fun drawNoUser()
+    {
+        view!!.findViewById<TextView>(R.id.profileName).setText("Anonymous")
+        view!!.findViewById<TextView>(R.id.profilAge).setText("0")
+        view!!.findViewById<ImageView>(R.id.profilePicture).setImageResource(R.drawable.default_profile)
+    }
+
+
+    private fun drawUser(userStr:String)
+    {
+        val parser: Parser = Parser.default()
+        val stringBuilder: StringBuilder = StringBuilder(userStr)
+        val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+        try{
+            view!!.findViewById<TextView>(R.id.profileName).setText(json.string("name"))
+            view!!.findViewById<TextView>(R.id.profilAge).setText(json.int("age").toString())
+
+
+
+            val imageView = view!!.findViewById<ImageView>(R.id.profilePicture)
+            Picasso.get().load(json.string("photoLink")).into(imageView)
+        }
+        catch (e:Exception)
+        {
+            Log.e("drawUSerException", e.toString())
+            drawNoUser()
+        }
+
+
+    }
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -103,23 +131,5 @@ class profileFragment : Fragment(), View.OnClickListener {
 
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment profileFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            profileFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
+
 }
