@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import com.example.tvseriesprojectapp.Config
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.user.User
@@ -44,8 +45,8 @@ class loginFragment : Fragment(), View.OnClickListener{
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        this.ip = (activity as MainActivity?)?.ip!!
-        this.port = (activity as MainActivity?)?.port!!
+        this.ip = Config.ip!!
+        this.port = Config.port
         this.url = "http://${ip}:${port}/register/insecure"
 
         //пока что RSA не работает, шлем в открытую логин пароль

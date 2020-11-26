@@ -46,6 +46,7 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun login(v:View){
         if (v != null) {
             when (v.id) {
@@ -54,6 +55,7 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onClick(v: View?) {
         val toast: Toast = Toast.makeText(this, "Trying to login.", Toast.LENGTH_LONG);
         toast.show()
@@ -64,6 +66,7 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun loginPressed() {
         Log.d("Login", "Try login")
 
@@ -82,6 +85,7 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun tryLogin(login: String, password: String) : Boolean {
         //ToDo implement login with dataBase connect
         //ToDo за одно прокинь сюда роль юзер или админ Session.role = Role.valueOf("user or admin")

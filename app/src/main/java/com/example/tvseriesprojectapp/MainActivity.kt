@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.example.tvseriesprojectapp.fragments.loginFragment

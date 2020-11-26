@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
+import com.example.tvseriesprojectapp.Config
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.UserProfile
@@ -42,8 +43,8 @@ class profileFragment : Fragment(), View.OnClickListener {
 
         super.onCreate(savedInstanceState)
 
-        this.ip = (activity as MainActivity?)?.ip!!
-        this.port = (activity as MainActivity?)?.port!!
+        this.ip = Config.ip!!
+        this.port = Config.port!!
         this.url = "http://${ip}:${port}/profile"
 
     }
