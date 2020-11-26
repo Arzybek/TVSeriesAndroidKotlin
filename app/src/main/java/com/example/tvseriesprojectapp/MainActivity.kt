@@ -18,8 +18,6 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
-    val ip = "192.168.0.109" // 109 - laptop, 103 - pc
-    val port = "8080"
 
     private val repoRetriever = TvShowsRetriever()
 
@@ -29,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         root.layoutManager = LinearLayoutManager(this)
 
-        val url = "http://${ip}:${port}/tvshows"
+        val url = "http://${Config.ip}:${Config.port}/tvshows"
         val search = "?q=2"
         var resp: String = "";
 //      val str: String = "[{\"id\":1,\"name\":\"Everybody hates Chris\",\"category\":\"comedy\",\"year\":2005},{\"id\":2,\"name\":\"Friends\",\"category\":\"comedy\",\"year\":1994}]";

@@ -21,9 +21,7 @@ class RepoListAdapter(private val repoList: RepoResult) : RecyclerView.Adapter<R
     override fun getItemCount(): Int = repoList.items.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val ip = "192.168.0.109" // 109 - laptop, 103 - pc
-        val port = "8080"
-        private val url = "http://${ip}:${port}/tvshows/image/";
+        private val url = "http://${Config.ip}:${Config.port}/tvshows/image/";
 
         fun bindRepo(repo: TvShow) {
             itemView.name.text = repo.name.orEmpty()

@@ -7,9 +7,7 @@ class TvShowsRetriever {
     private val service: TvSeriesService
 
     companion object {
-        const val ip = "192.168.0.109" // 109 - laptop, 103 - pc
-        const val port = "8080"
-        const val BASE_URL = "http://${ip}:${port}/"
+        const val BASE_URL = "http://${Config.ip}:${Config.port}/"
     }
 
     init {
