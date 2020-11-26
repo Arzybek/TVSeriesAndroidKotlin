@@ -6,9 +6,15 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.util.Log
+import android.view.View
+import android.widget.Toast
+import com.example.tvseriesprojectapp.fragments.loginFragment
+import com.example.tvseriesprojectapp.fragments.profileFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 //import org.jetbrains.anko.doAsync
@@ -18,14 +24,25 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
-
     private val repoRetriever = TvShowsRetriever()
+    val loginFrag = loginFragment()
+    val profileFrag = profileFragment()
+    var jwtCookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         root.layoutManager = LinearLayoutManager(this)
+
+        bottom_navigation.setOnNavigationItemSelectedListener{
+            when (it.itemId){
+                R.id.action_login->makeCurrentFragment(loginFrag)
+                R.id.action_mail->makeCurrentFragment(profileFrag)
+                else -> 1==1
+            }
+            true
+        }
 
         val url = "http://${Config.ip}:${Config.port}/tvshows"
         val search = "?q=2"
@@ -68,6 +85,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun onClick(v: View?) {
+        Log.d("Login", "Try login from main")
+        if (v != null) {
+            when (v.id) {
+                R.id.loginButton -> loginFrag.onClick(v)
+            }
+        }
+    }
+
+
+    fun makeCurrentFragment(fragment: Fragment) = supportFragmentManager.beginTransaction().apply {
+        replace(R.id.fl_wrapper, fragment)
+        commit()
+    }
+
+    fun makeCurrentFragment(fragmentTag: String) = supportFragmentManager.beginTransaction().apply {
+        when (fragmentTag){
+            "loginFragment"-> replace(R.id.fl_wrapper, loginFrag)
+            "profileFragment"->replace(R.id.fl_wrapper, profileFrag)
+        }
+        //replace(R.id.fl_wrapper, fragment)
+        commit()
+    }
+
+
     private fun isNetworkConnected(): Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -78,5 +120,16 @@ class MainActivity : AppCompatActivity() {
         val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
         return networkCapabilities != null &&
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+
+    fun setJWT(jwt:String)
+    {
+        this.jwtCookie = jwt;
+    }
+
+    fun getJWT():String
+    {
+        return this.jwtCookie;
     }
 }
