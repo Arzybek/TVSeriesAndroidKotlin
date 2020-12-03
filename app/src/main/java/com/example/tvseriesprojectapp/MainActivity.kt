@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton1 -> loginFrag.onClick(v)
-                com.example.tvseriesprojectapp.R.id.refreshButton -> allFragment.onClick(v)
+                R.id.refreshButton -> allFragment.onClick(v)
             }
         }
     }
