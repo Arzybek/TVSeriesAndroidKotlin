@@ -40,9 +40,17 @@ class allFragment : Fragment(), View.OnClickListener {
         mContext = context
     }
 
+    override fun onResume(){
+        super.onResume()
+        root.layoutManager = LinearLayoutManager(mContext)
+        retrieveRepositories()
+        refreshButton.setOnClickListener {
+            retrieveRepositories()
+        }
+    }
+
     fun onCreate(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) {
         root.layoutManager = LinearLayoutManager(mContext)
-
 //        if (isNetworkConnected()) {
 //            retrieveRepositories()
 //        } else {
@@ -53,6 +61,7 @@ class allFragment : Fragment(), View.OnClickListener {
 //                    .setIcon(android.R.drawable.ic_dialog_alert).show()
 //            }
 //        }
+        retrieveRepositories()
         refreshButton.setOnClickListener {
             retrieveRepositories()
         }
