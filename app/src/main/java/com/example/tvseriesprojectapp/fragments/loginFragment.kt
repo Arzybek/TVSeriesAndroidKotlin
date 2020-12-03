@@ -1,6 +1,5 @@
 package com.example.tvseriesprojectapp.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -9,9 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
-import com.example.tvseriesprojectapp.Config
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
+import com.example.tvseriesprojectapp.user.Session
 import com.example.tvseriesprojectapp.user.User
 import io.ktor.client.HttpClient
 import io.ktor.client.features.cookies.AcceptAllCookiesStorage
@@ -45,8 +44,8 @@ class loginFragment : Fragment(), View.OnClickListener{
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        this.ip = Config.ip!!
-        this.port = Config.port
+        this.ip = Session.ip!!
+        this.port = Session.port
         this.url = "http://${ip}:${port}/register/insecure"
 
         //пока что RSA не работает, шлем в открытую логин пароль

@@ -1,4 +1,5 @@
 package com.example.tvseriesprojectapp
+import com.example.tvseriesprojectapp.user.Session
 import retrofit2.Callback
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -7,7 +8,7 @@ class TvShowsRetriever {
     private val service: TvSeriesService
 
     companion object {
-        const val BASE_URL = "http://${Config.ip}:${Config.port}/"
+        const val BASE_URL = "http://${Session.ip}:${Session.port}/"
     }
 
     init {

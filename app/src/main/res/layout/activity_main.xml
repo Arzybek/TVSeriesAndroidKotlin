@@ -10,19 +10,6 @@
         android:id="@+id/fl_wrapper"
         android:layout_above="@id/bottom_navigation"/>
 
-    <android.support.v7.widget.RecyclerView
-            android:id="@+id/root"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    <Button
-            android:id="@+id/refreshButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/refreshButton"
-            android:layout_gravity="bottom"
-            />
-
     <android.support.design.widget.BottomNavigationView
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
@@ -32,6 +19,5 @@
             app:itemIconTint="@color/colorPrimaryDark"
             app:itemTextColor="@color/colorAccent"
             app:menu="@menu/menu_bottom_navigation" />
-
 
 </RelativeLayout>

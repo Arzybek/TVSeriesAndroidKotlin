@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.Toast
 import com.example.tvseriesprojectapp.common.HTTPHandler
 import com.example.tvseriesprojectapp.common.RSA
+import com.example.tvseriesprojectapp.user.Session
 import com.example.tvseriesprojectapp.user.User
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
@@ -29,10 +30,7 @@ class LoginScreen :AppCompatActivity(), View.OnClickListener{
     private var cookieJWT:String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        val ip = "172.17.98.49" // 109 - laptop, 103 - pc
-        val port = "8080"
-        val url = "http://${ip}:${port}/tvshows/register"
+        val url = "http://${Session.ip}:${Session.port}/tvshows/register"
         this.URL = url
 
         doAsync {

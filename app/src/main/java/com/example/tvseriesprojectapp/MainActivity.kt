@@ -6,14 +6,18 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
+import android.support.v7.app.ActionBar
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.example.tvseriesprojectapp.fragments.allFragment
 import com.example.tvseriesprojectapp.fragments.loginFragment
 import com.example.tvseriesprojectapp.fragments.profileFragment
+import com.example.tvseriesprojectapp.user.Session
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 //import org.jetbrains.anko.doAsync
@@ -23,72 +27,34 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
-    private val repoRetriever = TvShowsRetriever()
     val loginFrag = loginFragment()
     val profileFrag = profileFragment()
+    val allFragment  = allFragment()
     var jwtCookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        root.layoutManager = LinearLayoutManager(this)
 
         bottom_navigation.setOnNavigationItemSelectedListener{
             when (it.itemId){
-                R.id.action_login->makeCurrentFragment(loginFrag)
-                R.id.action_mail->makeCurrentFragment(profileFrag)
+                R.id.action_login-> makeCurrentFragment(loginFrag)
+                R.id.action_mail-> makeCurrentFragment(profileFrag)
+                R.id.action_all -> makeCurrentFragment(allFragment)
                 else -> 1==1
             }
             true
         }
 
-        val url = "http://${Config.ip}:${Config.port}/tvshows"
-        val search = "?q=2"
-        var resp: String = "";
-//      val str: String = "[{\"id\":1,\"name\":\"Everybody hates Chris\",\"category\":\"comedy\",\"year\":2005},{\"id\":2,\"name\":\"Friends\",\"category\":\"comedy\",\"year\":1994}]";
-
-        if(isNetworkConnected()) {
-            retrieveRepositories()
-        }
-        else {
-        AlertDialog.Builder(this).setTitle("No Internet Connection")
-            .setMessage("Please check your internet connection and try again")
-            .setPositiveButton(android.R.string.ok) { _, _ -> }
-            .setIcon(android.R.drawable.ic_dialog_alert).show()
-        }
-        refreshButton.setOnClickListener {
-            retrieveRepositories()
-        }
-    }
-
-    fun retrieveRepositories() {
-        //1 Create a Coroutine scope using a job to be able to cancel when needed
-        val mainActivityJob = Job()
-
-        //2 Handle exceptions if any
-        val errorHandler = CoroutineExceptionHandler { _, exception ->
-            AlertDialog.Builder(this).setTitle("Error")
-                .setMessage(exception.message)
-                .setPositiveButton(android.R.string.ok) { _, _ -> }
-                .setIcon(android.R.drawable.ic_dialog_alert).show()
-        }
-
-        //3 the Coroutine runs using the Main (UI) dispatcher
-        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
-        coroutineScope.launch(errorHandler) {
-            //4
-            val resultList = TvShowsRetriever().getRepositories()
-            val result = RepoResult(resultList)
-            root.adapter = RepoListAdapter(result)
-        }
+//        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
     fun onClick(v: View?) {
-        Log.d("Login", "Try login from main")
         if (v != null) {
             when (v.id) {
-                R.id.loginButton -> loginFrag.onClick(v)
+                R.id.loginButton1 -> loginFrag.onClick(v)
+                com.example.tvseriesprojectapp.R.id.refreshButton -> allFragment.onClick(v)
             }
         }
     }
@@ -102,25 +68,38 @@ class MainActivity : AppCompatActivity() {
     fun makeCurrentFragment(fragmentTag: String) = supportFragmentManager.beginTransaction().apply {
         when (fragmentTag){
             "loginFragment"-> replace(R.id.fl_wrapper, loginFrag)
-            "profileFragment"->replace(R.id.fl_wrapper, profileFrag)
+            "profileFragment"-> replace(R.id.fl_wrapper, profileFrag)
+            "allFragment"-> replace(R.id.fl_wrapper, allFragment)
         }
         //replace(R.id.fl_wrapper, fragment)
         commit()
     }
 
-
-    private fun isNetworkConnected(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            connectivityManager.activeNetwork
-        } else {
-            TODO("VERSION.SDK_INT < M")
-        }
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
-        return networkCapabilities != null &&
-                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
-
+//    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+//        when (item.itemId) {
+//            R.id.action_map -> {
+//                openFragment(profileFrag)
+//                return@OnNavigationItemSelectedListener true
+//            }
+//            R.id.action_login -> {
+//                openFragment(loginFrag)
+//                return@OnNavigationItemSelectedListener true
+//            }
+//            R.id.action_all -> {
+//                openFragment(allFragment)
+//                return@OnNavigationItemSelectedListener true
+//            }
+//        }
+//        false
+//    }
+//
+//
+//    private fun openFragment(fragment: Fragment) {
+//        val transaction = supportFragmentManager.beginTransaction()
+//        transaction.replace(R.id.container, fragment)
+//        transaction.addToBackStack(null)
+//        transaction.commit()
+//    }
 
     fun setJWT(jwt:String)
     {

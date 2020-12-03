@@ -6,18 +6,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
-import com.example.tvseriesprojectapp.Config
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
-import com.example.tvseriesprojectapp.UserProfile
-import com.example.tvseriesprojectapp.user.User
+import com.example.tvseriesprojectapp.user.Session
 import com.squareup.picasso.Picasso
 import io.ktor.client.HttpClient
 import io.ktor.client.features.cookies.AcceptAllCookiesStorage
@@ -35,16 +31,16 @@ import java.lang.Exception
 class profileFragment : Fragment(), View.OnClickListener {
 
 
-    private var ip = ""
-    private var port = ""
+    private var ip = Session.ip
+    private var port = Session.port
     private var url = "http://${ip}:${port}/register/insecure"
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
-        this.ip = Config.ip!!
-        this.port = Config.port!!
+        this.ip = Session.ip!!
+        this.port = Session.port!!
         this.url = "http://${ip}:${port}/profile"
 
     }

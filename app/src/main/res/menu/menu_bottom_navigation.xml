@@ -5,7 +5,7 @@
         android:icon="@android:drawable/ic_dialog_map"
         android:title="@string/profile"/>
     <item
-        android:id="@+id/action_dial"
+        android:id="@+id/action_all"
         android:icon="@android:drawable/ic_dialog_dialer"
         android:title="@string/list" />
     <item

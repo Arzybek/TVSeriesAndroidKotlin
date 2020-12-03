@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.tvseriesprojectapp.user.Session
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_repo.view.*
 
@@ -21,7 +22,7 @@ class RepoListAdapter(private val repoList: RepoResult) : RecyclerView.Adapter<R
     override fun getItemCount(): Int = repoList.items.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val url = "http://${Config.ip}:${Config.port}/tvshows/image/";
+        private val url = "http://${Session.ip}:${Session.port}/tvshows/image/";
 
         fun bindRepo(repo: TvShow) {
             itemView.name.text = repo.name.orEmpty()
