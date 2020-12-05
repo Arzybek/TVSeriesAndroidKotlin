@@ -74,7 +74,7 @@ class loginFragment : Fragment(), View.OnClickListener{
     fun login(v:View){
         if (v != null) {
             when (v.id) {
-                R.id.loginButton -> loginPressed()
+                R.id.loginButton1 -> loginPressed()
             }
         }
     }
@@ -83,7 +83,7 @@ class loginFragment : Fragment(), View.OnClickListener{
         Log.d("Login", "Try login from loginfrag")
         if (v != null) {
             when (v.id) {
-                R.id.loginButton -> loginPressed()
+                R.id.loginButton1 -> loginPressed()
             }
         }
     }

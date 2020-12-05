@@ -14,6 +14,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.RepoListAdapter
 import com.example.tvseriesprojectapp.RepoResult
 import com.example.tvseriesprojectapp.TvShowsRetriever
@@ -25,12 +27,22 @@ import kotlinx.coroutines.launch
 
 
 class allFragment : Fragment(), View.OnClickListener {
+    inner class ClickListener(val cookie: String): RepoListAdapter.OnItemClickListener{
+        override fun onItemClick(position: Int) {
+            Toast.makeText(mContext,cookie, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private val repoRetriever = TvShowsRetriever()
     val url = "http://${Session.ip}:${Session.port}/tvshows"
     val search = "?q=2"
+    var cookie = "";
+    var clickHandler = ClickListener(cookie)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        this.cookie = (activity as MainActivity).getJWT()
+        clickHandler = ClickListener(cookie)
         return inflater.inflate(com.example.tvseriesprojectapp.R.layout.fragment_all, container, false)
     }
 
@@ -43,6 +55,7 @@ class allFragment : Fragment(), View.OnClickListener {
     override fun onResume(){
         super.onResume()
         root.layoutManager = LinearLayoutManager(mContext)
+//        this.cookie = (activity as MainActivity).getJWT()
         retrieveRepositories()
         refreshButton.setOnClickListener {
             retrieveRepositories()
@@ -89,7 +102,7 @@ class allFragment : Fragment(), View.OnClickListener {
             //4
             val resultList = TvShowsRetriever().getRepositories()
             val result = RepoResult(resultList)
-            root.adapter = RepoListAdapter(result)
+            root.adapter = RepoListAdapter(result, clickHandler)
         }
     }
 
