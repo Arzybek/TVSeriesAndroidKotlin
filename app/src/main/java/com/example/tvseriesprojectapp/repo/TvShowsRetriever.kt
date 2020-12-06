@@ -1,6 +1,6 @@
-package com.example.tvseriesprojectapp
+package com.example.tvseriesprojectapp.repo
+import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.user.Session
-import retrofit2.Callback
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

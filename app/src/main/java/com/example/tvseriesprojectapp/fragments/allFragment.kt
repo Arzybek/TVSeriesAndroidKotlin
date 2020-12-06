@@ -2,23 +2,18 @@ package com.example.tvseriesprojectapp.fragments
 
 import android.R
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat.getSystemService
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import com.example.tvseriesprojectapp.MainActivity
-import com.example.tvseriesprojectapp.RepoListAdapter
-import com.example.tvseriesprojectapp.RepoResult
-import com.example.tvseriesprojectapp.TvShowsRetriever
+import com.example.tvseriesprojectapp.*
+import com.example.tvseriesprojectapp.dto.RepoResult
+import com.example.tvseriesprojectapp.dto.TvShow
+import com.example.tvseriesprojectapp.repo.RepoListAdapter
+import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
 import kotlinx.android.synthetic.main.fragment_all.*
 import kotlinx.coroutines.*
@@ -27,15 +22,23 @@ import kotlinx.coroutines.launch
 
 
 class allFragment : Fragment(), View.OnClickListener {
+    public var result: List<TvShow> = listOf()
+
     inner class ClickListener(val cookie: String): RepoListAdapter.OnItemClickListener{
         override fun onItemClick(position: Int) {
-            Toast.makeText(mContext,cookie, Toast.LENGTH_SHORT).show()
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            var bundle = Bundle()
+            bundle.putInt("id", position)
+            if (transaction != null) {
+                val fragment = showFragment()
+                fragment.arguments = bundle
+                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
+                transaction.disallowAddToBackStack()
+                transaction.commit()
+            }
         }
     }
 
-    private val repoRetriever = TvShowsRetriever()
-    val url = "http://${Session.ip}:${Session.port}/tvshows"
-    val search = "?q=2"
     var cookie = "";
     var clickHandler = ClickListener(cookie)
 
@@ -53,17 +56,17 @@ class allFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onResume(){
-        super.onResume()
         root.layoutManager = LinearLayoutManager(mContext)
 //        this.cookie = (activity as MainActivity).getJWT()
         retrieveRepositories()
         refreshButton.setOnClickListener {
             retrieveRepositories()
         }
+        super.onResume()
     }
 
-    fun onCreate(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) {
-        root.layoutManager = LinearLayoutManager(mContext)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 //        if (isNetworkConnected()) {
 //            retrieveRepositories()
 //        } else {
@@ -74,11 +77,10 @@ class allFragment : Fragment(), View.OnClickListener {
 //                    .setIcon(android.R.drawable.ic_dialog_alert).show()
 //            }
 //        }
-        retrieveRepositories()
-        refreshButton.setOnClickListener {
-            retrieveRepositories()
-        }
-        super.onCreate(savedInstanceState)
+//        retrieveRepositories()
+//        refreshButton.setOnClickListener {
+//            retrieveRepositories()
+//        }
     }
 
     fun retrieveRepositories() {
@@ -101,17 +103,18 @@ class allFragment : Fragment(), View.OnClickListener {
         coroutineScope.launch(errorHandler) {
             //4
             val resultList = TvShowsRetriever().getRepositories()
+            result = resultList
             val result = RepoResult(resultList)
             root.adapter = RepoListAdapter(result, clickHandler)
         }
     }
 
     override fun onClick(v: View?) {
-        if (v != null) {
-            when (v.id) {
-                com.example.tvseriesprojectapp.R.id.refreshButton -> retrieveRepositories()
-            }
-        }
+//        if (v != null) {
+//            when (v.id) {
+//                com.example.tvseriesprojectapp.R.id.refreshButton -> retrieveRepositories()
+//            }
+//        }
     }
 
 //    private fun isNetworkConnected(): Boolean {

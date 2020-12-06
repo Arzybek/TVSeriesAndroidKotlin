@@ -1,4 +1,4 @@
-package com.example.tvseriesprojectapp
+package com.example.tvseriesprojectapp.dto
 
 data class RepoResult(val items: List<TvShow>)
 

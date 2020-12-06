@@ -1,9 +1,12 @@
-package com.example.tvseriesprojectapp
+package com.example.tvseriesprojectapp.repo
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.tvseriesprojectapp.R
+import com.example.tvseriesprojectapp.dto.RepoResult
+import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.user.Session
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_repo.view.*
