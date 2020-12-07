@@ -19,6 +19,7 @@ import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
 import com.example.tvseriesprojectapp.user.Session
+import com.example.tvseriesprojectapp.user.Session.port
 import io.ktor.client.*
 import io.ktor.client.features.cookies.*
 import io.ktor.client.request.*
@@ -28,6 +29,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.net.URL
+import java.net.URLEncoder
 
 
 class showFragment : Fragment(), View.OnClickListener {
@@ -78,6 +80,8 @@ class showFragment : Fragment(), View.OnClickListener {
             )
             dynamicButton.x = 20.0F;
             dynamicButton.y = i*100+20.0F;
+            dynamicButton.setTag(R.id.resourceShowID, a.id)
+            dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i-1).id)
             if (a.episodes.get(i-1).isWatched)
             {
                 dynamicButton.isActivated = true
@@ -95,31 +99,40 @@ class showFragment : Fragment(), View.OnClickListener {
             //dynamicButton.setOnClickListener { Toast.makeText((activity as MainActivity), "marked ep "+i.toString(), Toast.LENGTH_LONG).show() }
 
             dynamicButton.setOnClickListener{
+
+                val postUrl = "http://${Session.ip}:${Session.port}/user/"
+                val showID = dynamicButton.getTag(R.id.resourceShowID)
+                val epID = dynamicButton.getTag(R.id.resourceEpisodeID)
+
+
+                var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
+                reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(epID.toString(), "UTF-8")
+
                 val jwt = (activity as MainActivity?)?.getJWT()!!
                 val client = HttpClient(){
                     install(HttpCookies) {
                         storage = AcceptAllCookiesStorage()
                         GlobalScope.launch(Dispatchers.IO) {
                             storage.addCookie(url, Cookie("auth", jwt))
-                            storage.addCookie(url, Cookie("show-epID", "TABURETH"))//нужно хранить в кнопке сериал и эпизод
                         }
                     }
                 }
 
                 if (dynamicButton.isActivated)
                 {
-                    //это нужная штука, разберемся как посылать data - верну
-                    /*runBlocking(Dispatchers.IO) {
-                        client.post<String>(url+"/unwatchEpisode")
-                    }*/
+                    runBlocking(Dispatchers.IO) {
+                        Log.d("showButtonPost", postUrl+"unwatchEpisode?"+reqParam)
+                        client.post<String>(postUrl+"unwatchEpisode?"+reqParam)
+                    }
                     dynamicButton.isActivated = false
                     dynamicButton.setBackgroundColor(Color.GRAY)
                 }
                 else
                 {
-                    /*runBlocking(Dispatchers.IO) {
-                        client.post<String>(url+"/watchEpisode")
-                    }*/
+                    runBlocking(Dispatchers.IO) {
+                        Log.d("showButtonPost", postUrl+"watchEpisode?"+reqParam)
+                        client.post<String>(postUrl+"watchEpisode?"+reqParam)
+                    }
                     dynamicButton.isActivated = true
                     dynamicButton.setBackgroundColor(Color.GREEN)
                 }
