@@ -108,12 +108,16 @@ class showFragment : Fragment(), View.OnClickListener {
                 var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
                 reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(epID.toString(), "UTF-8")
 
+                var watchURL = postUrl+"watchEpisode?"+reqParam
+                var unwatchURL = postUrl+"unwatchEpisode?"+reqParam
+
                 val jwt = (activity as MainActivity?)?.getJWT()!!
-                val client = HttpClient(){
+                var client = HttpClient(){
                     install(HttpCookies) {
                         storage = AcceptAllCookiesStorage()
                         GlobalScope.launch(Dispatchers.IO) {
-                            storage.addCookie(url, Cookie("auth", jwt))
+                            storage.addCookie(watchURL, Cookie("auth", jwt))
+                            storage.addCookie(unwatchURL, Cookie("auth", jwt))
                         }
                     }
                 }
@@ -122,7 +126,7 @@ class showFragment : Fragment(), View.OnClickListener {
                 {
                     runBlocking(Dispatchers.IO) {
                         Log.d("showButtonPost", postUrl+"unwatchEpisode?"+reqParam)
-                        client.post<String>(postUrl+"unwatchEpisode?"+reqParam)
+                        client.post<String>(unwatchURL)
                     }
                     dynamicButton.isActivated = false
                     dynamicButton.setBackgroundColor(Color.GRAY)
@@ -131,7 +135,7 @@ class showFragment : Fragment(), View.OnClickListener {
                 {
                     runBlocking(Dispatchers.IO) {
                         Log.d("showButtonPost", postUrl+"watchEpisode?"+reqParam)
-                        client.post<String>(postUrl+"watchEpisode?"+reqParam)
+                        client.post<String>(watchURL)
                     }
                     dynamicButton.isActivated = true
                     dynamicButton.setBackgroundColor(Color.GREEN)
