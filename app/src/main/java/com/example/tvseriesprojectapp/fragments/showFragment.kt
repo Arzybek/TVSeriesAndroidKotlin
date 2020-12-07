@@ -70,6 +70,34 @@ class showFragment : Fragment(), View.OnClickListener {
 
 
 
+        val isWatching = checkWatchingShow(a.id);
+
+        val addToWatchingButton = Button(this.context)
+        addToWatchingButton.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        addToWatchingButton.x = 20.0F;
+        addToWatchingButton.y = 0F;
+        addToWatchingButton.setTag(R.id.resourceShowID, a.id)
+        if (isWatching)
+        {
+            addToWatchingButton.isActivated = true
+            addToWatchingButton.setBackgroundColor(Color.GREEN)
+        }
+        else
+        {
+            addToWatchingButton.isActivated = false
+            addToWatchingButton.setBackgroundColor(Color.GRAY)
+        }
+
+        addToWatchingButton.text = "Watching"
+
+        addToWatchingButton.setOnClickListener{
+            onAddToWatchingClick(addToWatchingButton);
+        }
+        linearLayout.addView(addToWatchingButton, addToWatchingButton.layoutParams);
+
         for (i in 1..a.episodes.size)
         {
             val dynamicButton = Button(this.context)
@@ -82,7 +110,7 @@ class showFragment : Fragment(), View.OnClickListener {
             dynamicButton.y = i*100+20.0F;
             dynamicButton.setTag(R.id.resourceShowID, a.id)
             dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i-1).id)
-            if (a.episodes.get(i-1).isWatched)
+            if (checkWatchedEpisode(a.id, a.episodes.get(i-1).id))
             {
                 dynamicButton.isActivated = true
                 dynamicButton.setBackgroundColor(Color.GREEN)
@@ -96,50 +124,9 @@ class showFragment : Fragment(), View.OnClickListener {
                 dynamicButton.text = "episode $i"
             else
                 dynamicButton.text = "episode $i: "+a.episodes.get(i-1).description
-            //dynamicButton.setOnClickListener { Toast.makeText((activity as MainActivity), "marked ep "+i.toString(), Toast.LENGTH_LONG).show() }
 
             dynamicButton.setOnClickListener{
-
-                val postUrl = "http://${Session.ip}:${Session.port}/user/"
-                val showID = dynamicButton.getTag(R.id.resourceShowID)
-                val epID = dynamicButton.getTag(R.id.resourceEpisodeID)
-
-
-                var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
-                reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(epID.toString(), "UTF-8")
-
-                var watchURL = postUrl+"watchEpisode?"+reqParam
-                var unwatchURL = postUrl+"unwatchEpisode?"+reqParam
-
-                val jwt = (activity as MainActivity?)?.getJWT()!!
-                var client = HttpClient(){
-                    install(HttpCookies) {
-                        storage = AcceptAllCookiesStorage()
-                        GlobalScope.launch(Dispatchers.IO) {
-                            storage.addCookie(watchURL, Cookie("auth", jwt))
-                            storage.addCookie(unwatchURL, Cookie("auth", jwt))
-                        }
-                    }
-                }
-
-                if (dynamicButton.isActivated)
-                {
-                    runBlocking(Dispatchers.IO) {
-                        Log.d("showButtonPost", postUrl+"unwatchEpisode?"+reqParam)
-                        client.post<String>(unwatchURL)
-                    }
-                    dynamicButton.isActivated = false
-                    dynamicButton.setBackgroundColor(Color.GRAY)
-                }
-                else
-                {
-                    runBlocking(Dispatchers.IO) {
-                        Log.d("showButtonPost", postUrl+"watchEpisode?"+reqParam)
-                        client.post<String>(watchURL)
-                    }
-                    dynamicButton.isActivated = true
-                    dynamicButton.setBackgroundColor(Color.GREEN)
-                }
+                onEpisodeClick(dynamicButton);
             }
             linearLayout.addView(dynamicButton, dynamicButton.layoutParams);
         }
@@ -151,6 +138,150 @@ class showFragment : Fragment(), View.OnClickListener {
 
 
         //return inflater.inflate(R.layout.fragment_show, container, false)
+    }
+
+
+    private fun onEpisodeClick(dynamicButton:Button)
+    {
+        val postUrl = "http://${Session.ip}:${Session.port}/user/"
+        val showID = dynamicButton.getTag(R.id.resourceShowID)
+        val epID = dynamicButton.getTag(R.id.resourceEpisodeID)
+
+
+        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
+        reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(epID.toString(), "UTF-8")
+
+        var watchURL = postUrl+"watchEpisode?"+reqParam
+        var unwatchURL = postUrl+"unwatchEpisode?"+reqParam
+
+        val jwt = (activity as MainActivity?)?.getJWT()!!
+        var client = HttpClient(){
+            install(HttpCookies) {
+                storage = AcceptAllCookiesStorage()
+                GlobalScope.launch(Dispatchers.IO) {
+                    storage.addCookie(watchURL, Cookie("auth", jwt))
+                    storage.addCookie(unwatchURL, Cookie("auth", jwt))
+                }
+            }
+        }
+
+        if (dynamicButton.isActivated)
+        {
+            runBlocking(Dispatchers.IO) {
+                Log.d("showButtonPost", postUrl+"unwatchEpisode?"+reqParam)
+                client.post<String>(unwatchURL)
+            }
+            dynamicButton.isActivated = false
+            dynamicButton.setBackgroundColor(Color.GRAY)
+        }
+        else
+        {
+            runBlocking(Dispatchers.IO) {
+                Log.d("showButtonPost", postUrl+"watchEpisode?"+reqParam)
+                client.post<String>(watchURL)
+            }
+            dynamicButton.isActivated = true
+            dynamicButton.setBackgroundColor(Color.GREEN)
+        }
+    }
+
+    private fun onAddToWatchingClick(dynamicButton:Button)
+    {
+        val postUrl = "http://${Session.ip}:${Session.port}/user/"
+        val showID = dynamicButton.getTag(R.id.resourceShowID)
+
+
+        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
+
+        var watchURL = postUrl+"addWatching?"+reqParam
+        var unwatchURL = postUrl+"deleteWatching?"+reqParam
+
+        val jwt = (activity as MainActivity?)?.getJWT()!!
+        var client = HttpClient(){
+            install(HttpCookies) {
+                storage = AcceptAllCookiesStorage()
+                GlobalScope.launch(Dispatchers.IO) {
+                    storage.addCookie(watchURL, Cookie("auth", jwt))
+                    storage.addCookie(unwatchURL, Cookie("auth", jwt))
+                }
+            }
+        }
+
+        if (dynamicButton.isActivated)
+        {
+            runBlocking(Dispatchers.IO) {
+                Log.d("showButtonPost", unwatchURL)
+                client.post<String>(unwatchURL)
+            }
+            dynamicButton.isActivated = false
+            dynamicButton.setBackgroundColor(Color.GRAY)
+        }
+        else
+        {
+            runBlocking(Dispatchers.IO) {
+                Log.d("showButtonPost", watchURL)
+                client.post<String>(watchURL)
+            }
+            dynamicButton.isActivated = true
+            dynamicButton.setBackgroundColor(Color.GREEN)
+        }
+    }
+
+
+    private fun checkWatchingShow(showID:Long):Boolean
+    {
+        val getUrl = "http://${Session.ip}:${Session.port}/user/"
+        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
+        var isWatchingUrl = getUrl+"isWatching?"+reqParam
+
+        val jwt = (activity as MainActivity?)?.getJWT()!!
+        var client = HttpClient(){
+            install(HttpCookies) {
+                storage = AcceptAllCookiesStorage()
+                GlobalScope.launch(Dispatchers.IO) {
+                    storage.addCookie(isWatchingUrl, Cookie("auth", jwt))
+                }
+            }
+        }
+        var data = ""
+
+        runBlocking(Dispatchers.IO) {
+            Log.d("showButtonPost", isWatchingUrl)
+            data = client.get<String>(isWatchingUrl)
+        }
+
+        if (data=="true")
+            return true
+        return false
+    }
+
+
+    private fun checkWatchedEpisode(showID:Long, epID:Long):Boolean
+    {
+        val getUrl = "http://${Session.ip}:${Session.port}/user/"
+        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
+        reqParam += "&" + URLEncoder.encode("episodeID", "UTF-8") + "=" + URLEncoder.encode(epID.toString(), "UTF-8")
+        var isWatchingUrl = getUrl+"isWatched?"+reqParam
+
+        val jwt = (activity as MainActivity?)?.getJWT()!!
+        var client = HttpClient(){
+            install(HttpCookies) {
+                storage = AcceptAllCookiesStorage()
+                GlobalScope.launch(Dispatchers.IO) {
+                    storage.addCookie(isWatchingUrl, Cookie("auth", jwt))
+                }
+            }
+        }
+        var data = ""
+
+        runBlocking(Dispatchers.IO) {
+            Log.d("showButtonPost", isWatchingUrl)
+            data = client.get<String>(isWatchingUrl)
+        }
+
+        if (data=="true")
+            return true
+        return false
     }
 
     override fun onResume() {
