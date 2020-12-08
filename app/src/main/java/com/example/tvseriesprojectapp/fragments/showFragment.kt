@@ -98,7 +98,10 @@ class showFragment : Fragment(), View.OnClickListener {
         }
         linearLayout.addView(addToWatchingButton, addToWatchingButton.layoutParams);
 
-        for (i in 1..a.episodes.size)
+
+        var watchedEpisodes = getWatchedEpisodes(a.id)
+
+        for (i in 0..a.episodes.size-1)
         {
             val dynamicButton = Button(this.context)
             dynamicButton.id = i;
@@ -107,26 +110,42 @@ class showFragment : Fragment(), View.OnClickListener {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             dynamicButton.x = 20.0F;
-            dynamicButton.y = i*100+20.0F;
+            dynamicButton.y = i*100+120.0F;
             dynamicButton.setTag(R.id.resourceShowID, a.id)
-            dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i-1).id)
-            if (checkWatchedEpisode(a.id, a.episodes.get(i-1).id))
-            {
-                dynamicButton.isActivated = true
-                dynamicButton.setBackgroundColor(Color.GREEN)
-            }
-            else
+            dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i).id)
+            if (watchedEpisodes==null)
             {
                 dynamicButton.isActivated = false
                 dynamicButton.setBackgroundColor(Color.GRAY)
             }
-            if (a.episodes.get(i-1).description=="NULL" || a.episodes.get(i-1).description==null)
+            else
+            {
+                if (watchedEpisodes.size<i+1)
+                {
+                    dynamicButton.isActivated = false
+                    dynamicButton.setBackgroundColor(Color.GRAY)
+                }
+                else
+                {
+                    if (watchedEpisodes[i]==false)
+                    {
+                        dynamicButton.isActivated = false
+                        dynamicButton.setBackgroundColor(Color.GRAY)
+                    }
+                    else
+                    {
+                        dynamicButton.isActivated = true
+                        dynamicButton.setBackgroundColor(Color.GREEN)
+                    }
+                }
+            }
+            if (a.episodes.get(i).description=="NULL" || a.episodes.get(i).description==null)
                 dynamicButton.text = "episode $i"
             else
-                dynamicButton.text = "episode $i: "+a.episodes.get(i-1).description
+                dynamicButton.text = "episode $i: "+a.episodes.get(i).description
 
             dynamicButton.setOnClickListener{
-                onEpisodeClick(dynamicButton);
+                onEpisodeClick(dynamicButton, i);
             }
             linearLayout.addView(dynamicButton, dynamicButton.layoutParams);
         }
@@ -141,7 +160,7 @@ class showFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun onEpisodeClick(dynamicButton:Button)
+    private fun onEpisodeClick(dynamicButton:Button, epIndex:Int)
     {
         val postUrl = "http://${Session.ip}:${Session.port}/user/"
         val showID = dynamicButton.getTag(R.id.resourceShowID)
@@ -149,7 +168,7 @@ class showFragment : Fragment(), View.OnClickListener {
 
 
         var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
-        reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(epID.toString(), "UTF-8")
+        reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(epIndex.toString(), "UTF-8")
 
         var watchURL = postUrl+"watchEpisode?"+reqParam
         var unwatchURL = postUrl+"unwatchEpisode?"+reqParam
@@ -255,13 +274,13 @@ class showFragment : Fragment(), View.OnClickListener {
         return false
     }
 
+    
 
-    private fun checkWatchedEpisode(showID:Long, epID:Long):Boolean
+    private fun getWatchedEpisodes(showID:Long):BooleanArray
     {
         val getUrl = "http://${Session.ip}:${Session.port}/user/"
         var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
-        reqParam += "&" + URLEncoder.encode("episodeID", "UTF-8") + "=" + URLEncoder.encode(epID.toString(), "UTF-8")
-        var isWatchingUrl = getUrl+"isWatched?"+reqParam
+        var isWatchingUrl = getUrl+"watchedEpisodes?"+reqParam
 
         val jwt = (activity as MainActivity?)?.getJWT()!!
         var client = HttpClient(){
@@ -275,14 +294,29 @@ class showFragment : Fragment(), View.OnClickListener {
         var data = ""
 
         runBlocking(Dispatchers.IO) {
-            Log.d("showButtonPost", isWatchingUrl)
+            Log.d("getWatchedRequest", isWatchingUrl)
             data = client.get<String>(isWatchingUrl)
+            Log.d("getWatchedRequestData", data)
+            System.out.println(data)
         }
 
-        if (data=="true")
-            return true
-        return false
+        if (data.equals(""))
+        {
+            return BooleanArray(0)
+        }
+
+        data = data.removeSuffix("]").removePrefix("[")
+        var dataArr = data.split(",")
+        var outputArr = BooleanArray(dataArr.size)
+        for (i in 0..dataArr.size-1)
+        {
+            outputArr[i] = dataArr[i] != "false"
+        }
+
+
+        return outputArr;
     }
+
 
     override fun onResume() {
         Log.d("showFrag", "onResume")
