@@ -10,4 +10,7 @@
     <string name="hello_blank_fragment">login_fragment</string>
     <string name="refreshButton">Обновить</string>
     <string name="show_pic_descr">Picture of the show</string>
+    <string name="profile_image">Profile image</string>
+    <string name="no_profile">no_profile</string>
+    <string name="no_age">no_age</string>
 </resources>

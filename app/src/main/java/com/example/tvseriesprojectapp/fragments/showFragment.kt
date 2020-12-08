@@ -68,8 +68,6 @@ class showFragment : Fragment(), View.OnClickListener {
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
             .execute(url)
 
-
-
         val isWatching = checkWatchingShow(a.id);
 
         val addToWatchingButton = Button(this.context)
