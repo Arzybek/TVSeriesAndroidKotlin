@@ -113,32 +113,24 @@ class showFragment : Fragment(), View.OnClickListener {
             dynamicButton.y = i*100+120.0F;
             dynamicButton.setTag(R.id.resourceShowID, a.id)
             dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i).id)
-            if (watchedEpisodes==null)
+            if (watchedEpisodes.size<i+1)
             {
                 dynamicButton.isActivated = false
                 dynamicButton.setBackgroundColor(Color.GRAY)
             }
             else
             {
-                if (watchedEpisodes.size<i+1)
+                if (watchedEpisodes[i]==false)
                 {
                     dynamicButton.isActivated = false
                     dynamicButton.setBackgroundColor(Color.GRAY)
                 }
                 else
                 {
-                    if (watchedEpisodes[i]==false)
-                    {
-                        dynamicButton.isActivated = false
-                        dynamicButton.setBackgroundColor(Color.GRAY)
-                    }
-                    else
-                    {
-                        dynamicButton.isActivated = true
-                        dynamicButton.setBackgroundColor(Color.GREEN)
-                    }
+                    dynamicButton.isActivated = true
+                    dynamicButton.setBackgroundColor(Color.GREEN)
                 }
-            }
+                }
             if (a.episodes.get(i).description=="NULL" || a.episodes.get(i).description==null)
                 dynamicButton.text = "episode $i"
             else
@@ -149,14 +141,7 @@ class showFragment : Fragment(), View.OnClickListener {
             }
             linearLayout.addView(dynamicButton, dynamicButton.layoutParams);
         }
-
-
-
         return mContainer
-
-
-
-        //return inflater.inflate(R.layout.fragment_show, container, false)
     }
 
 
@@ -164,7 +149,6 @@ class showFragment : Fragment(), View.OnClickListener {
     {
         val postUrl = "http://${Session.ip}:${Session.port}/user/"
         val showID = dynamicButton.getTag(R.id.resourceShowID)
-        val epID = dynamicButton.getTag(R.id.resourceEpisodeID)
 
 
         var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
@@ -229,7 +213,6 @@ class showFragment : Fragment(), View.OnClickListener {
         if (dynamicButton.isActivated)
         {
             runBlocking(Dispatchers.IO) {
-                Log.d("showButtonPost", unwatchURL)
                 client.post<String>(unwatchURL)
             }
             dynamicButton.isActivated = false
@@ -238,7 +221,6 @@ class showFragment : Fragment(), View.OnClickListener {
         else
         {
             runBlocking(Dispatchers.IO) {
-                Log.d("showButtonPost", watchURL)
                 client.post<String>(watchURL)
             }
             dynamicButton.isActivated = true
@@ -274,7 +256,6 @@ class showFragment : Fragment(), View.OnClickListener {
         return false
     }
 
-    
 
     private fun getWatchedEpisodes(showID:Long):BooleanArray
     {
