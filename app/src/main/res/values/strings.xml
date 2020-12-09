@@ -13,4 +13,6 @@
     <string name="profile_image">Profile image</string>
     <string name="no_profile">no_profile</string>
     <string name="no_age">no_age</string>
+    <string name="episode_name">episode name</string>
+    <string name="episode_description">episode description</string>
 </resources>

@@ -9,6 +9,9 @@ import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +21,9 @@ import android.widget.LinearLayout
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
+import com.example.tvseriesprojectapp.dto.EpisodeSerias
+import com.example.tvseriesprojectapp.repo.RepoListAdapter
+import com.example.tvseriesprojectapp.repo.RepoListAdapterSerias
 import com.example.tvseriesprojectapp.user.Session
 import com.example.tvseriesprojectapp.user.Session.port
 import io.ktor.client.*
@@ -28,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.anko.toast
 import java.net.URL
 import java.net.URLEncoder
 
@@ -59,7 +66,7 @@ class showFragment : Fragment(), View.OnClickListener {
         val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
 
 
-        val a = (activity as MainActivity).allFragment.result[pos]
+        var a = (activity as MainActivity).allFragment.result[pos]
         linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
         linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
         linearLayout.findViewById<TextView>(R.id.show_category).setText(a.category)
@@ -96,52 +103,27 @@ class showFragment : Fragment(), View.OnClickListener {
         }
         linearLayout.addView(addToWatchingButton, addToWatchingButton.layoutParams);
 
+        val episodeView = linearLayout.findViewById<RecyclerView>(R.id.episodeView)
+        episodeView.layoutManager = GridLayoutManager(linearLayout.context, 9)
+        a.episodes[1].isWatched = true
+        episodeView.adapter = RepoListAdapterSerias(EpisodeSerias(a.episodes), ClickListener() )
 
         var watchedEpisodes = getWatchedEpisodes(a.id)
 
-        for (i in 0..a.episodes.size-1)
-        {
-            val dynamicButton = Button(this.context)
-            dynamicButton.id = i;
-            dynamicButton.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            dynamicButton.x = 20.0F;
-            dynamicButton.y = i*100+120.0F;
-            dynamicButton.setTag(R.id.resourceShowID, a.id)
-            dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i).id)
-            if (watchedEpisodes.size<i+1)
-            {
-                dynamicButton.isActivated = false
-                dynamicButton.setBackgroundColor(Color.GRAY)
-            }
-            else
-            {
-                if (watchedEpisodes[i]==false)
-                {
-                    dynamicButton.isActivated = false
-                    dynamicButton.setBackgroundColor(Color.GRAY)
-                }
-                else
-                {
-                    dynamicButton.isActivated = true
-                    dynamicButton.setBackgroundColor(Color.GREEN)
-                }
-                }
-            if (a.episodes.get(i).description=="NULL" || a.episodes.get(i).description==null)
-                dynamicButton.text = "episode $i"
-            else
-                dynamicButton.text = "episode $i: "+a.episodes.get(i).description
+        var buttons: MutableList<Button> = mutableListOf()
 
-            dynamicButton.setOnClickListener{
-                onEpisodeClick(dynamicButton, i);
-            }
-            linearLayout.addView(dynamicButton, dynamicButton.layoutParams);
-        }
+
+
+
         return mContainer
     }
 
+    inner class ClickListener(): RepoListAdapterSerias.OnItemClickListener{
+        override fun onItemClick(position: Int) {
+
+            context?.toast("press episode - " + position)
+        }
+    }
 
     private fun onEpisodeClick(dynamicButton:Button, epIndex:Int)
     {
