@@ -35,6 +35,7 @@ import java.net.URLEncoder
 class showFragment : Fragment(), View.OnClickListener {
     private var url = "http://${Session.ip}:${Session.port}/"
     private var pos = -1;
+    private var cookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("showFrag", "onCreate")
@@ -47,6 +48,7 @@ class showFragment : Fragment(), View.OnClickListener {
         arguments?.getInt("id")?.let {
             pos = it
         }
+        cookie = (activity as MainActivity).getJWT()
     }
 
     override fun onCreateView(
@@ -68,76 +70,66 @@ class showFragment : Fragment(), View.OnClickListener {
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
             .execute(url)
 
-        val isWatching = checkWatchingShow(a.id);
+        if(cookie!="") {
+            val isWatching = checkWatchingShow(a.id);
 
-        val addToWatchingButton = Button(this.context)
-        addToWatchingButton.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        addToWatchingButton.x = 20.0F;
-        addToWatchingButton.y = 0F;
-        addToWatchingButton.setTag(R.id.resourceShowID, a.id)
-        if (isWatching)
-        {
-            addToWatchingButton.isActivated = true
-            addToWatchingButton.setBackgroundColor(Color.GREEN)
-        }
-        else
-        {
-            addToWatchingButton.isActivated = false
-            addToWatchingButton.setBackgroundColor(Color.GRAY)
-        }
-
-        addToWatchingButton.text = "Watching"
-
-        addToWatchingButton.setOnClickListener{
-            onAddToWatchingClick(addToWatchingButton);
-        }
-        linearLayout.addView(addToWatchingButton, addToWatchingButton.layoutParams);
-
-
-        var watchedEpisodes = getWatchedEpisodes(a.id)
-
-        for (i in 0..a.episodes.size-1)
-        {
-            val dynamicButton = Button(this.context)
-            dynamicButton.id = i;
-            dynamicButton.layoutParams = LinearLayout.LayoutParams(
+            val addToWatchingButton = Button(this.context)
+            addToWatchingButton.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            dynamicButton.x = 20.0F;
-            dynamicButton.y = i*100+120.0F;
-            dynamicButton.setTag(R.id.resourceShowID, a.id)
-            dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i).id)
-            if (watchedEpisodes.size<i+1)
-            {
-                dynamicButton.isActivated = false
-                dynamicButton.setBackgroundColor(Color.GRAY)
+            addToWatchingButton.x = 20.0F;
+            addToWatchingButton.y = 0F;
+            addToWatchingButton.setTag(R.id.resourceShowID, a.id)
+            if (isWatching) {
+                addToWatchingButton.isActivated = true
+                addToWatchingButton.setBackgroundColor(Color.GREEN)
+            } else {
+                addToWatchingButton.isActivated = false
+                addToWatchingButton.setBackgroundColor(Color.GRAY)
             }
-            else
-            {
-                if (watchedEpisodes[i]==false)
-                {
+
+            addToWatchingButton.text = "Watching"
+
+            addToWatchingButton.setOnClickListener {
+                onAddToWatchingClick(addToWatchingButton);
+            }
+            linearLayout.addView(addToWatchingButton, addToWatchingButton.layoutParams);
+
+            var watchedEpisodes = getWatchedEpisodes(a.id)
+            for (i in 0..a.episodes.size - 1) {
+                val dynamicButton = Button(this.context)
+                dynamicButton.id = i;
+                dynamicButton.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                dynamicButton.x = 20.0F;
+                dynamicButton.y = i * 100 + 120.0F;
+                dynamicButton.setTag(R.id.resourceShowID, a.id)
+                dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i).id)
+                if (watchedEpisodes.size < i + 1) {
                     dynamicButton.isActivated = false
                     dynamicButton.setBackgroundColor(Color.GRAY)
+                } else {
+                    if (watchedEpisodes[i] == false) {
+                        dynamicButton.isActivated = false
+                        dynamicButton.setBackgroundColor(Color.GRAY)
+                    } else {
+                        dynamicButton.isActivated = true
+                        dynamicButton.setBackgroundColor(Color.GREEN)
+                    }
                 }
+                if (a.episodes.get(i).description == "NULL" || a.episodes.get(i).description == null)
+                    dynamicButton.text = "episode $i"
                 else
-                {
-                    dynamicButton.isActivated = true
-                    dynamicButton.setBackgroundColor(Color.GREEN)
-                }
-                }
-            if (a.episodes.get(i).description=="NULL" || a.episodes.get(i).description==null)
-                dynamicButton.text = "episode $i"
-            else
-                dynamicButton.text = "episode $i: "+a.episodes.get(i).description
+                    dynamicButton.text = "episode $i: " + a.episodes.get(i).description
 
-            dynamicButton.setOnClickListener{
-                onEpisodeClick(dynamicButton, i);
+                dynamicButton.setOnClickListener {
+                    onEpisodeClick(dynamicButton, i);
+                }
+                linearLayout.addView(dynamicButton, dynamicButton.layoutParams);
             }
-            linearLayout.addView(dynamicButton, dynamicButton.layoutParams);
         }
         return mContainer
     }
@@ -190,7 +182,6 @@ class showFragment : Fragment(), View.OnClickListener {
     {
         val postUrl = "http://${Session.ip}:${Session.port}/user/"
         val showID = dynamicButton.getTag(R.id.resourceShowID)
-
 
         var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
 
