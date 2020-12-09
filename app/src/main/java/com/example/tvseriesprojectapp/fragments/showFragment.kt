@@ -1,16 +1,13 @@
 package com.example.tvseriesprojectapp.fragments;
 
-import android.app.ActionBar
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,10 +19,9 @@ import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
 import com.example.tvseriesprojectapp.dto.EpisodeSerias
-import com.example.tvseriesprojectapp.repo.RepoListAdapter
+import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.repo.RepoListAdapterSerias
 import com.example.tvseriesprojectapp.user.Session
-import com.example.tvseriesprojectapp.user.Session.port
 import io.ktor.client.*
 import io.ktor.client.features.cookies.*
 import io.ktor.client.request.*
@@ -56,6 +52,8 @@ class showFragment : Fragment(), View.OnClickListener {
         }
     }
 
+    var currentShow: TvShow? = null;
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -65,17 +63,17 @@ class showFragment : Fragment(), View.OnClickListener {
         val mContainer = inflater.inflate(R.layout.fragment_show, null)
         val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
 
-
-        var a = (activity as MainActivity).allFragment.result[pos]
-        linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
-        linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
-        linearLayout.findViewById<TextView>(R.id.show_category).setText(a.category)
-        linearLayout.findViewById<TextView>(R.id.show_year).setText(a.year.toString())
-        val url = url+"tvshows/image/"+a.id.toString()
+        var show = (activity as MainActivity).allFragment.result[pos]
+        currentShow = show
+        linearLayout.findViewById<TextView>(R.id.show_name).setText(show.name)
+        linearLayout.findViewById<TextView>(R.id.show_name).setText(show.name)
+        linearLayout.findViewById<TextView>(R.id.show_category).setText(show.category)
+        linearLayout.findViewById<TextView>(R.id.show_year).setText(show.year.toString())
+        val url = url+"tvshows/image/"+show.id.toString()
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
             .execute(url)
 
-        val isWatching = checkWatchingShow(a.id);
+        val isWatching = checkWatchingShow(show.id);
 
         val addToWatchingButton = Button(this.context)
         addToWatchingButton.layoutParams = LinearLayout.LayoutParams(
@@ -84,7 +82,7 @@ class showFragment : Fragment(), View.OnClickListener {
         )
         addToWatchingButton.x = 20.0F;
         addToWatchingButton.y = 0F;
-        addToWatchingButton.setTag(R.id.resourceShowID, a.id)
+        addToWatchingButton.setTag(R.id.resourceShowID, show.id)
         if (isWatching)
         {
             addToWatchingButton.isActivated = true
@@ -104,24 +102,58 @@ class showFragment : Fragment(), View.OnClickListener {
         linearLayout.addView(addToWatchingButton, addToWatchingButton.layoutParams);
 
         val episodeView = linearLayout.findViewById<RecyclerView>(R.id.episodeView)
-        episodeView.layoutManager = GridLayoutManager(linearLayout.context, 9)
-        a.episodes[1].isWatched = true
-        episodeView.adapter = RepoListAdapterSerias(EpisodeSerias(a.episodes), ClickListener() )
-
-        var watchedEpisodes = getWatchedEpisodes(a.id)
-
-        var buttons: MutableList<Button> = mutableListOf()
-
+        episodeView.refreshDrawableState()
+        var watchedEpisodes = getWatchedEpisodes(show.id)
+        val e = show.episodes.zip(watchedEpisodes).forEach{ pair -> pair.first.isWatched = pair.second }
+        episodeView.layoutManager = GridLayoutManager(linearLayout.context, 5)
+        episodeView.adapter = RepoListAdapterSerias(EpisodeSerias(show.episodes), ClickListener(episodeView)  )
 
 
 
         return mContainer
     }
 
-    inner class ClickListener(): RepoListAdapterSerias.OnItemClickListener{
+    inner class ClickListener(val rv: RecyclerView): RepoListAdapterSerias.OnItemClickListener{
         override fun onItemClick(position: Int) {
-
+            if (currentShow == null) return
             context?.toast("press episode - " + position)
+            val postUrl = "http://${Session.ip}:${Session.port}/user/"
+
+            var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(currentShow?.id.toString(), "UTF-8")
+            reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(position.toString(), "UTF-8")
+
+            var watchURL = postUrl+"watchEpisode?"+reqParam
+            var unwatchURL = postUrl+"unwatchEpisode?"+reqParam
+
+            val jwt = (activity as MainActivity?)?.getJWT()!!
+            var client = HttpClient(){
+                install(HttpCookies) {
+                    storage = AcceptAllCookiesStorage()
+                    GlobalScope.launch(Dispatchers.IO) {
+                        storage.addCookie(watchURL, Cookie("auth", jwt))
+                        storage.addCookie(unwatchURL, Cookie("auth", jwt))
+                    }
+                }
+            }
+
+            val episode: Episode = currentShow!!.episodes[position]
+
+            if (episode.isWatched)
+            {
+                runBlocking(Dispatchers.IO) {
+                    Log.d("showButtonPost", postUrl+"unwatchEpisode?"+reqParam)
+                    client.post<String>(unwatchURL)
+                }
+                episode.isWatched = false
+            }
+            else
+            {
+                runBlocking(Dispatchers.IO) {
+                    Log.d("showButtonPost", postUrl+"watchEpisode?"+reqParam)
+                    client.post<String>(watchURL)
+                }
+                episode.isWatched = true
+            }
         }
     }
 
@@ -237,7 +269,7 @@ class showFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun getWatchedEpisodes(showID:Long):BooleanArray
+    private fun getWatchedEpisodes(showID:Long):List<Boolean>
     {
         val getUrl = "http://${Session.ip}:${Session.port}/user/"
         var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
@@ -263,7 +295,7 @@ class showFragment : Fragment(), View.OnClickListener {
 
         if (data.equals(""))
         {
-            return BooleanArray(0)
+            return listOf()
         }
 
         data = data.removeSuffix("]").removePrefix("[")
@@ -275,7 +307,7 @@ class showFragment : Fragment(), View.OnClickListener {
         }
 
 
-        return outputArr;
+        return outputArr.toList();
     }
 
 
