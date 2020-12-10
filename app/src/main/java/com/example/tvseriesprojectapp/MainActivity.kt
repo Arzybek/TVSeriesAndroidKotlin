@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.View
+import com.example.tvseriesprojectapp.fragments.addshowFragment
 import com.example.tvseriesprojectapp.fragments.allFragment
 import com.example.tvseriesprojectapp.fragments.loginFragment
 import com.example.tvseriesprojectapp.fragments.profileFragment
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     val loginFrag = loginFragment()
     val profileFrag = profileFragment()
     val allFragment  = allFragment()
+    val addshowFragment = addshowFragment()
     var jwtCookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.action_login-> makeCurrentFragment(loginFrag)
                 R.id.action_profile-> makeCurrentFragment(profileFrag)
                 R.id.action_all -> makeCurrentFragment(allFragment)
+                R.id.action_addshow -> makeCurrentFragment(addshowFragment)
                 else -> 1==1
             }
             true
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
             when (v.id) {
                 R.id.loginButton1 -> loginFrag.onClick(v)
                 R.id.refreshButton -> allFragment.onClick(v)
+                R.id.addShowButton -> addshowFragment.onClick(v)
             }
         }
     }
@@ -56,6 +60,7 @@ class MainActivity : AppCompatActivity() {
             "loginFragment"-> replace(R.id.fl_wrapper, loginFrag)
             "profileFragment"-> replace(R.id.fl_wrapper, profileFrag)
             "allFragment"-> replace(R.id.fl_wrapper, allFragment)
+            "addshowFragment" -> replace(R.id.fl_wrapper, addshowFragment)
         }
         //replace(R.id.fl_wrapper, fragment)
         commit()

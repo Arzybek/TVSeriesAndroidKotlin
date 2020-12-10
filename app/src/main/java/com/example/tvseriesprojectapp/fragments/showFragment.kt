@@ -60,8 +60,15 @@ class showFragment : Fragment(), View.OnClickListener {
         val mContainer = inflater.inflate(R.layout.fragment_show, null)
         val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
 
+        var a = (activity as MainActivity).allFragment.result[0]
 
-        val a = (activity as MainActivity).allFragment.result[pos]
+        for (show in (activity as MainActivity).allFragment.result)
+        {
+            if (show.id.toInt()==pos)
+                a = show
+        }
+
+        //val a = (activity as MainActivity).allFragment.result[pos]
         linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
         linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
         linearLayout.findViewById<TextView>(R.id.show_category).setText(a.category)

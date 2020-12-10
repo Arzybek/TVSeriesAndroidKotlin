@@ -34,13 +34,18 @@ class RepoListAdapter(private val repoList: RepoResult, private val listener: On
             itemView.name.text = repo.name.orEmpty()
             itemView.category.text = repo.category.orEmpty()
             itemView.year.text = repo.year.toString().orEmpty()
-            Picasso.get().load(url+repo.id.toString()).into(itemView.icon)
+            if (repo.imgLink=="")
+                Picasso.get().load(url+repo.id.toString()).into(itemView.icon) // здесь можно просто грузить какую нибудь заглушку
+            else
+                Picasso.get().load(url+repo.imgLink).into(itemView.icon)
+               //Picasso.get().load(url+repo.id.toString()).into(itemView.icon)
         }
 
         override fun onClick(p0: View?) {
             val position = adapterPosition
+            val id = repoList.items[position].id
             if(position != RecyclerView.NO_POSITION)
-                listener.onItemClick(position)
+                listener.onItemClick(id.toInt())
         }
     }
 
