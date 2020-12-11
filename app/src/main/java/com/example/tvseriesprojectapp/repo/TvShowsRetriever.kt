@@ -50,4 +50,9 @@ class TvShowsRetriever {
     suspend fun getRepositoriesUser(str: String): List<TvShow>  {
         return service.searchRepositoriesUser(str)
     }
+
+    suspend fun getShow(showID:Long) : TvShow
+    {
+        return service.getShow(showID.toString())
+    }
 }

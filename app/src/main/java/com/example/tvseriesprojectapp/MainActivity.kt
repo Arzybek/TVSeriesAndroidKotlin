@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.action_login-> makeCurrentFragment(loginFrag)
                 R.id.action_profile-> makeCurrentFragment(profileFrag)
                 R.id.action_all -> makeCurrentFragment(allFragment)
-                R.id.action_addshow -> makeCurrentFragment(addshowFragment)
                 else -> 1==1
             }
             true
@@ -45,6 +44,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.loginButton1 -> loginFrag.onClick(v)
                 R.id.refreshButton -> allFragment.onClick(v)
                 R.id.addShowButton -> addshowFragment.onClick(v)
+                R.id.addShowProfileButton -> makeCurrentFragment(addshowFragment)
             }
         }
     }

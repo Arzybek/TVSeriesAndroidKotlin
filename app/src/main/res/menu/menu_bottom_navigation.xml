@@ -12,8 +12,4 @@
         android:id="@+id/action_profile"
         android:icon="@android:drawable/ic_dialog_email"
         android:title="@string/profile" />
-    <item
-        android:id="@+id/action_addshow"
-        android:icon="@android:drawable/ic_dialog_map"
-        android:title="@string/addshow" />
 </menu>

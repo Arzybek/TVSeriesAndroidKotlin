@@ -9,6 +9,8 @@ import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
+import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,16 +20,19 @@ import android.widget.LinearLayout
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
+import com.example.tvseriesprojectapp.dto.RepoResult
+import com.example.tvseriesprojectapp.dto.TvShow
+import com.example.tvseriesprojectapp.repo.RepoListAdapter
+import com.example.tvseriesprojectapp.repo.TvSeriesService
+import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
 import com.example.tvseriesprojectapp.user.Session.port
 import io.ktor.client.*
 import io.ktor.client.features.cookies.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.android.synthetic.main.fragment_all.*
+import kotlinx.coroutines.*
 import java.net.URL
 import java.net.URLEncoder
 
@@ -58,32 +63,38 @@ class showFragment : Fragment(), View.OnClickListener {
         Log.d("showFrag", "oncreatview")
 
         val mContainer = inflater.inflate(R.layout.fragment_show, null)
-        val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
 
-        var a = (activity as MainActivity).allFragment.result[0]
+        val mainActivityJob = Job()
 
-        for (show in (activity as MainActivity).allFragment.result)
-        {
-            if (show.id.toInt()==pos)
-                a = show
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine launch")
+            val resultShow = TvShowsRetriever().getShow(pos.toLong())
+            drawShow(mContainer, resultShow)
         }
 
-        //val a = (activity as MainActivity).allFragment.result[pos]
+        return mContainer
+    }
+
+
+    private fun drawShow(mContainer:View, a:TvShow): View
+    {
+        val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
         linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
         linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
         linearLayout.findViewById<TextView>(R.id.show_category).setText(a.category)
         linearLayout.findViewById<TextView>(R.id.show_year).setText(a.year.toString())
         val url = url+"tvshows/image/"+a.id.toString()
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
-            .execute(url)
+                .execute(url)
 
         if(cookie!="") {
             val isWatching = checkWatchingShow(a.id);
 
             val addToWatchingButton = Button(this.context)
             addToWatchingButton.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
             )
             addToWatchingButton.x = 20.0F;
             addToWatchingButton.y = 0F;
@@ -108,8 +119,8 @@ class showFragment : Fragment(), View.OnClickListener {
                 val dynamicButton = Button(this.context)
                 dynamicButton.id = i;
                 dynamicButton.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 dynamicButton.x = 20.0F;
                 dynamicButton.y = i * 100 + 120.0F;
@@ -140,6 +151,8 @@ class showFragment : Fragment(), View.OnClickListener {
         }
         return mContainer
     }
+
+
 
 
     private fun onEpisodeClick(dynamicButton:Button, epIndex:Int)
