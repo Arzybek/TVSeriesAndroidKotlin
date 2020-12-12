@@ -55,4 +55,48 @@ class TvShowsRetriever {
     {
         return service.getShow(showID.toString())
     }
+
+
+    suspend fun watchingShow(showID: Long, cookie:String)
+    {
+        var cookieToSend = "auth="+cookie
+        service.watchingShow(showID.toString(), cookieToSend)
+    }
+
+    suspend fun unwatchingShow(showID: Long, cookie:String)
+    {
+        var cookieToSend = "auth="+cookie
+        service.unwatchingShow(showID.toString(), cookieToSend)
+    }
+
+
+    suspend fun watchingEpisode(showID: Long, episodeID:Long, cookie:String)
+    {
+        var cookieToSend = "auth="+cookie
+        service.watchingEpisode(showID.toString(), episodeID.toString(), cookieToSend)
+    }
+
+    suspend fun unwatchingEpisode(showID: Long, episodeID:Long, cookie:String)
+    {
+        var cookieToSend = "auth="+cookie
+        service.unwatchingEpisode(showID.toString(), episodeID.toString(), cookieToSend)
+    }
+
+    suspend fun isWatching(showID: Long, cookie:String):Boolean
+    {
+        var cookieToSend = "auth="+cookie
+        return service.isWatchingShow(showID.toString(), cookieToSend)
+    }
+
+    suspend fun getWatchedEpisodes(showID: Long, cookie:String):Array<Boolean>
+    {
+        var cookieToSend = "auth="+cookie
+        return service.getWatchedEpisodes(showID.toString(), cookieToSend)
+    }
+
+    suspend fun addUserShow(showData:String, cookie:String)
+    {
+        var cookieToSend = "auth="+cookie
+        service.addUserShow(showData, cookieToSend)
+    }
 }

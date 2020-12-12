@@ -33,6 +33,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.android.synthetic.main.fragment_all.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.produce
 import java.net.URL
 import java.net.URLEncoder
 
@@ -60,7 +61,7 @@ class showFragment : Fragment(), View.OnClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d("showFrag", "oncreatview")
+        Log.d("showFragment", "oncreatview")
 
         val mContainer = inflater.inflate(R.layout.fragment_show, null)
 
@@ -81,21 +82,27 @@ class showFragment : Fragment(), View.OnClickListener {
     {
         val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
         linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
-        linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
         linearLayout.findViewById<TextView>(R.id.show_category).setText(a.category)
         linearLayout.findViewById<TextView>(R.id.show_year).setText(a.year.toString())
         val url = url+"tvshows/image/"+a.id.toString()
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
                 .execute(url)
 
-        if(cookie!="") {
-            val isWatching = checkWatchingShow(a.id);
 
-            val addToWatchingButton = Button(this.context)
+        var cont = this.context
+
+        val mainActivityJob = Job()
+
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine drawShow launch")
+            var isWatching = TvShowsRetriever().isWatching(a.id, cookie)
+            val addToWatchingButton = Button(cont)
             addToWatchingButton.layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             )
+
             addToWatchingButton.x = 20.0F;
             addToWatchingButton.y = 0F;
             addToWatchingButton.setTag(R.id.resourceShowID, a.id)
@@ -106,17 +113,18 @@ class showFragment : Fragment(), View.OnClickListener {
                 addToWatchingButton.isActivated = false
                 addToWatchingButton.setBackgroundColor(Color.GRAY)
             }
-
             addToWatchingButton.text = "Watching"
 
             addToWatchingButton.setOnClickListener {
-                onAddToWatchingClick(addToWatchingButton);
+                onAddToWatchingClickAsync(addToWatchingButton);
             }
             linearLayout.addView(addToWatchingButton, addToWatchingButton.layoutParams);
 
-            var watchedEpisodes = getWatchedEpisodes(a.id)
+
+
+            var watchedEpisodes = TvShowsRetriever().getWatchedEpisodes(a.id, cookie)
             for (i in 0..a.episodes.size - 1) {
-                val dynamicButton = Button(this.context)
+                val dynamicButton = Button(cont)
                 dynamicButton.id = i;
                 dynamicButton.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -144,167 +152,63 @@ class showFragment : Fragment(), View.OnClickListener {
                     dynamicButton.text = "episode $i: " + a.episodes.get(i).description
 
                 dynamicButton.setOnClickListener {
-                    onEpisodeClick(dynamicButton, i);
+                    onEpisodeClickAsync(dynamicButton, i);
                 }
                 linearLayout.addView(dynamicButton, dynamicButton.layoutParams);
             }
+
         }
+
         return mContainer
+
     }
 
 
-
-
-    private fun onEpisodeClick(dynamicButton:Button, epIndex:Int)
+    private fun onEpisodeClickAsync(dynamicButton:Button, epIndex:Int)
     {
-        val postUrl = "http://${Session.ip}:${Session.port}/user/"
         val showID = dynamicButton.getTag(R.id.resourceShowID)
 
+        val mainActivityJob = Job()
 
-        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
-        reqParam += "&" + URLEncoder.encode("epID", "UTF-8") + "=" + URLEncoder.encode(epIndex.toString(), "UTF-8")
-
-        var watchURL = postUrl+"watchEpisode?"+reqParam
-        var unwatchURL = postUrl+"unwatchEpisode?"+reqParam
-
-        val jwt = (activity as MainActivity?)?.getJWT()!!
-        var client = HttpClient(){
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(watchURL, Cookie("auth", jwt))
-                    storage.addCookie(unwatchURL, Cookie("auth", jwt))
-                }
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine onEpisodeClick launch")
+            if (dynamicButton.isActivated)
+            {
+                dynamicButton.isActivated = false
+                dynamicButton.setBackgroundColor(Color.GRAY)
+                TvShowsRetriever().unwatchingEpisode(showID as Long, epIndex.toLong(), cookie)
             }
-        }
-
-        if (dynamicButton.isActivated)
-        {
-            runBlocking(Dispatchers.IO) {
-                Log.d("showButtonPost", postUrl+"unwatchEpisode?"+reqParam)
-                client.post<String>(unwatchURL)
+            else
+            {
+                dynamicButton.isActivated = true
+                dynamicButton.setBackgroundColor(Color.GREEN)
+                TvShowsRetriever().watchingEpisode(showID as Long, epIndex.toLong(), cookie)
             }
-            dynamicButton.isActivated = false
-            dynamicButton.setBackgroundColor(Color.GRAY)
-        }
-        else
-        {
-            runBlocking(Dispatchers.IO) {
-                Log.d("showButtonPost", postUrl+"watchEpisode?"+reqParam)
-                client.post<String>(watchURL)
-            }
-            dynamicButton.isActivated = true
-            dynamicButton.setBackgroundColor(Color.GREEN)
         }
     }
 
-    private fun onAddToWatchingClick(dynamicButton:Button)
+    private fun onAddToWatchingClickAsync(dynamicButton:Button)
     {
-        val postUrl = "http://${Session.ip}:${Session.port}/user/"
         val showID = dynamicButton.getTag(R.id.resourceShowID)
 
-        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
+        val mainActivityJob = Job()
 
-        var watchURL = postUrl+"addWatching?"+reqParam
-        var unwatchURL = postUrl+"deleteWatching?"+reqParam
-
-        val jwt = (activity as MainActivity?)?.getJWT()!!
-        var client = HttpClient(){
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(watchURL, Cookie("auth", jwt))
-                    storage.addCookie(unwatchURL, Cookie("auth", jwt))
-                }
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine ononAddToWatching launch")
+            if (dynamicButton.isActivated) {
+                TvShowsRetriever().unwatchingShow(showID as Long, cookie)
+                dynamicButton.isActivated=false
+                dynamicButton.setBackgroundColor(Color.GRAY)
+            }
+            else {
+                TvShowsRetriever().watchingShow(showID as Long, cookie)
+                dynamicButton.isActivated = true
+                dynamicButton.setBackgroundColor(Color.GREEN)
             }
         }
 
-        if (dynamicButton.isActivated)
-        {
-            runBlocking(Dispatchers.IO) {
-                client.post<String>(unwatchURL)
-            }
-            dynamicButton.isActivated = false
-            dynamicButton.setBackgroundColor(Color.GRAY)
-        }
-        else
-        {
-            runBlocking(Dispatchers.IO) {
-                client.post<String>(watchURL)
-            }
-            dynamicButton.isActivated = true
-            dynamicButton.setBackgroundColor(Color.GREEN)
-        }
-    }
-
-
-    private fun checkWatchingShow(showID:Long):Boolean
-    {
-        val getUrl = "http://${Session.ip}:${Session.port}/user/"
-        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
-        var isWatchingUrl = getUrl+"isWatching?"+reqParam
-
-        val jwt = (activity as MainActivity?)?.getJWT()!!
-        var client = HttpClient(){
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(isWatchingUrl, Cookie("auth", jwt))
-                }
-            }
-        }
-        var data = ""
-
-        runBlocking(Dispatchers.IO) {
-            Log.d("showButtonPost", isWatchingUrl)
-            data = client.get<String>(isWatchingUrl)
-        }
-
-        if (data=="true")
-            return true
-        return false
-    }
-
-
-    private fun getWatchedEpisodes(showID:Long):BooleanArray
-    {
-        val getUrl = "http://${Session.ip}:${Session.port}/user/"
-        var reqParam = URLEncoder.encode("showID", "UTF-8") + "=" + URLEncoder.encode(showID.toString(), "UTF-8")
-        var isWatchingUrl = getUrl+"watchedEpisodes?"+reqParam
-
-        val jwt = (activity as MainActivity?)?.getJWT()!!
-        var client = HttpClient(){
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(isWatchingUrl, Cookie("auth", jwt))
-                }
-            }
-        }
-        var data = ""
-
-        runBlocking(Dispatchers.IO) {
-            Log.d("getWatchedRequest", isWatchingUrl)
-            data = client.get<String>(isWatchingUrl)
-            Log.d("getWatchedRequestData", data)
-            System.out.println(data)
-        }
-
-        if (data.equals(""))
-        {
-            return BooleanArray(0)
-        }
-
-        data = data.removeSuffix("]").removePrefix("[")
-        var dataArr = data.split(",")
-        var outputArr = BooleanArray(dataArr.size)
-        for (i in 0..dataArr.size-1)
-        {
-            outputArr[i] = dataArr[i] != "false"
-        }
-
-
-        return outputArr;
     }
 
 

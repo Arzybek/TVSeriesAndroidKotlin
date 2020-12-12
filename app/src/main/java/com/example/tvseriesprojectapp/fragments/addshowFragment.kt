@@ -1,5 +1,6 @@
 package com.example.tvseriesprojectapp.fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -11,6 +12,7 @@ import android.widget.Toast
 import com.beust.klaxon.Klaxon
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
+import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
 import com.example.tvseriesprojectapp.user.User
 import io.ktor.client.HttpClient
@@ -22,10 +24,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.http.Cookie
 import kotlinx.android.synthetic.main.fragment_addshow.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -63,50 +62,29 @@ class addshowFragment : Fragment() {
         Log.d("addShow", "Try add show")
         if (v != null) {
             when (v.id) {
-                R.id.addShowButton -> addShowButtonPressed()
+                R.id.addShowButton -> addShowButtonPressedAsync()
             }
         }
     }
 
-    private fun addShowButtonPressed() {
+    private fun addShowButtonPressedAsync(){
         val showName: EditText = view!!.findViewById<EditText>(R.id.showName)
         val epCount: EditText = view!!.findViewById<EditText>(R.id.episodesCount)
-
-
 
         val product = HashMap<String, String>();
         product.put("showName", showName.text.toString());
         product.put("episodesCount", epCount.text.toString())
         val result = Klaxon().toJsonString(product)
+        val cookie = (activity as MainActivity).jwtCookie
 
-        var urlPost = url+"user/addUserWatchingShow?info="+result
+        val mainActivityJob = Job()
 
-        //Log.i("Login", rsa)
-
-        var jwt = (activity as MainActivity?)?.getJWT()!!
-        val client = HttpClient(){
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(urlPost, Cookie("auth", jwt))
-                }
-            }
-        }
-
-        var data = ""
-
-
-        runBlocking (Dispatchers.IO) {
-            //data = client.post<String>(urlPost)
-            Log.i("addShow", "post request: "+urlPost)
-            Log.i("addShow", "JSON_RES: "+result)
-            //data = client.post(urlPost, result)
-            data = client.post(urlPost)
-            Log.i("addShow", "show sent")
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine addShowButtonPressedAsync launch")
+            TvShowsRetriever().addUserShow(result, cookie)
             (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
         }
-
-
     }
 
 }
