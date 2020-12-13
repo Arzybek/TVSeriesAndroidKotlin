@@ -11,7 +11,6 @@ import android.widget.Toast
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.user.Session
-import com.example.tvseriesprojectapp.user.User
 import io.ktor.client.HttpClient
 import io.ktor.client.features.cookies.AcceptAllCookiesStorage
 import io.ktor.client.features.cookies.HttpCookies
@@ -95,7 +94,6 @@ class loginFragment : Fragment(), View.OnClickListener{
         Log.i("login", "data: "+loginText.text.toString()+passwordText.text.toString())
         if (tryLogin(loginText.text.toString(), passwordText.text.toString())) {
             Log.i("Login", "Login was successful")
-            User.name = loginText.text.toString()
             val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
             toast.show()
             (activity as MainActivity?)?.makeCurrentFragment("profileFragment")

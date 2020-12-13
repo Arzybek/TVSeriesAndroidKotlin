@@ -1,6 +1,7 @@
 package com.example.tvseriesprojectapp.fragments
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
@@ -18,6 +19,8 @@ import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.RepoResult
 import com.example.tvseriesprojectapp.dto.TvShow
+import com.example.tvseriesprojectapp.dto.User
+import com.example.tvseriesprojectapp.repo.ProfileAdapter
 import com.example.tvseriesprojectapp.repo.RepoListAdapter
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
@@ -75,20 +78,35 @@ class profileFragment : Fragment(), View.OnClickListener {
     override fun onResume(){
         super.onResume()
 
-        var aa = activity.toString()
-        Log.i("prof", aa)
-        val file = File(context?.filesDir, "cookie")
-        var jwt = ""
-        if (file.exists())
-            jwt = file.readText()
-        else
-            jwt = ""
-        //var jwt = (activity as MainActivity?)?.getJWT()!!
-        val client = HttpClient(){
+        var cookie = (activity as MainActivity).getAuthCookie()
+
+        val mainActivityJob = Job()
+
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine onResumeProfile launch")
+            var user = ProfileAdapter().getProfile(cookie)
+            if (user.name==null)
+                drawNoUser()
+            else
+            {
+                Log.i("profile", user.name)
+                drawUser(user)
+            }
+
+            if(cookie!="") {
+                retrieveShows()
+                refreshButtonProfile.setOnClickListener {
+                    retrieveShows()
+                }
+            }
+        }
+
+        /*val client = HttpClient(){
             install(HttpCookies) {
                 storage = AcceptAllCookiesStorage()
                 GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(url, Cookie("auth", jwt))
+                    storage.addCookie(url, Cookie("auth", cookie))
                 }
             }
         }
@@ -101,7 +119,7 @@ class profileFragment : Fragment(), View.OnClickListener {
         }
 
         Log.i("profile", data)
-        Log.i("JWT", jwt)
+        Log.i("JWT", cookie)
 
         if (data.equals(""))
             drawNoUser()
@@ -113,7 +131,7 @@ class profileFragment : Fragment(), View.OnClickListener {
             refreshButtonProfile.setOnClickListener {
                 retrieveShows()
             }
-        }
+        }*/
     }
 
     fun retrieveShows() {
@@ -149,24 +167,18 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun drawUser(userStr:String)
+    private fun drawUser(user: User)
     {
-        val parser: Parser = Parser.default()
-        val stringBuilder: StringBuilder = StringBuilder(userStr)
-        val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+        view!!.findViewById<TextView>(R.id.profileName).setText(user.name)
+        view!!.findViewById<TextView>(R.id.profilAge).setText(user.age.toString())
         try{
-            view!!.findViewById<TextView>(R.id.profileName).setText(json.string("name"))
-            view!!.findViewById<TextView>(R.id.profilAge).setText(json.int("age").toString())
-
-
-
             val imageView = view!!.findViewById<ImageView>(R.id.profilePicture)
-            Picasso.get().load(json.string("photoLink")).into(imageView)
+            Picasso.get().load(user.photoLink).into(imageView)
         }
         catch (e:Exception)
         {
+            view!!.findViewById<ImageView>(R.id.profilePicture).setImageResource(R.drawable.default_profile)
             Log.e("drawUSerException", e.toString())
-            drawNoUser()
         }
 
 
