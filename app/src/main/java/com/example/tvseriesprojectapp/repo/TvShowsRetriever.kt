@@ -14,6 +14,7 @@ import java.util.*
 
 class TvShowsRetriever {
     private val service: TvSeriesService
+    private val perPage = 4;
 
     private class SessionCookieJar : CookieJar {
         private var cookies: List<okhttp3.Cookie>? = null
@@ -45,7 +46,7 @@ class TvShowsRetriever {
     }
 
     suspend fun getRepositories(): List<TvShow>  {
-        return service.searchRepositories()
+        return service.searchRepositories(perPage)
     }
 
     suspend fun getRepositoriesUser(str: String): List<TvShow>  {

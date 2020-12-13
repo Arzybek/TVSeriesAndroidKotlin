@@ -1,7 +1,6 @@
 package com.example.tvseriesprojectapp.fragments
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
@@ -12,9 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.RepoResult
@@ -25,17 +21,9 @@ import com.example.tvseriesprojectapp.repo.RepoListAdapter
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
 import com.squareup.picasso.Picasso
-import io.ktor.client.HttpClient
-import io.ktor.client.features.cookies.AcceptAllCookiesStorage
-import io.ktor.client.features.cookies.HttpCookies
-import io.ktor.client.features.cookies.addCookie
-import io.ktor.client.request.get
-import io.ktor.http.Cookie
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.coroutines.*
-import java.io.File
 import java.lang.Exception
-import kotlin.math.log
 
 
 class profileFragment : Fragment(), View.OnClickListener {
@@ -127,7 +115,7 @@ class profileFragment : Fragment(), View.OnClickListener {
     private fun drawNoUser()
     {
         view!!.findViewById<TextView>(R.id.profileName).setText("Anonymous")
-        view!!.findViewById<TextView>(R.id.profilAge).setText("0")
+        view!!.findViewById<TextView>(R.id.profileAge).setText("0")
         view!!.findViewById<ImageView>(R.id.profilePicture).setImageResource(R.drawable.default_profile)
     }
 
@@ -135,7 +123,7 @@ class profileFragment : Fragment(), View.OnClickListener {
     private fun drawUser(user: User)
     {
         view!!.findViewById<TextView>(R.id.profileName).setText(user.name)
-        view!!.findViewById<TextView>(R.id.profilAge).setText(user.age.toString())
+        view!!.findViewById<TextView>(R.id.profileAge).setText(user.age.toString())
         try{
             val imageView = view!!.findViewById<ImageView>(R.id.profilePicture)
             Picasso.get().load(user.photoLink).into(imageView)

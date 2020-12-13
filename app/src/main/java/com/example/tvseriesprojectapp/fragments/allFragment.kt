@@ -56,13 +56,13 @@ class allFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onResume(){
+        super.onResume()
         root.layoutManager = LinearLayoutManager(mContext)
 //        this.cookie = (activity as MainActivity).getJWT()
         retrieveRepositories()
         refreshButton.setOnClickListener {
             retrieveRepositories()
         }
-        super.onResume()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
