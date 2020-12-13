@@ -1,5 +1,6 @@
 package com.example.tvseriesprojectapp.fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -10,8 +11,10 @@ import android.widget.EditText
 import android.widget.Toast
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
+import com.example.tvseriesprojectapp.repo.ProfileAdapter
+import com.example.tvseriesprojectapp.repo.ProfileService
+import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
-import com.example.tvseriesprojectapp.user.User
 import io.ktor.client.HttpClient
 import io.ktor.client.features.cookies.AcceptAllCookiesStorage
 import io.ktor.client.features.cookies.HttpCookies
@@ -20,6 +23,7 @@ import io.ktor.client.features.cookies.cookies
 import io.ktor.client.request.post
 import io.ktor.http.Cookie
 import kotlinx.coroutines.*
+import java.io.File
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -35,7 +39,7 @@ class loginFragment : Fragment(), View.OnClickListener{
 
     private var rsa:String = ""
     private var URL:String = ""
-    private var cookieJWT:String = ""
+    //private var cookieJWT:String = ""
 
     private var ip = ""
     private var port = ""
@@ -92,73 +96,25 @@ class loginFragment : Fragment(), View.OnClickListener{
         val loginText: EditText = view!!.findViewById<EditText>(R.id.login)
         val passwordText: EditText = view!!.findViewById<EditText>(R.id.password)
         Log.i("login", "data: "+loginText.text.toString()+passwordText.text.toString())
-        if (tryLogin(loginText.text.toString(), passwordText.text.toString())) {
-            Log.i("Login", "Login was successful")
-            User.name = loginText.text.toString()
+        Log.i("Login", "url: "+url)
+
+        val logPass = loginText.text.toString()+":"+passwordText.text.toString()
+
+        Log.i("Login", "LogPass: "+logPass)
+
+
+        val mainActivityJob = Job()
+
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine tryLogin launch")
+            var data = ProfileAdapter().insecureRegister(logPass)
+            (activity as MainActivity).saveAuthCookie(data)
             val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
             toast.show()
             (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
-            //startActivity(Intent(view!!.context, MainActivity::class.java))// здесь возможно стоит как то научиться перебрасывать на фрагмент профиля
-        } else {
-            Log.i("Login", "Login was failed")
-            loginText.setText("")
-            passwordText.setText("")
-            val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
-            toast.show()
+
         }
-    }
-
-    private fun tryLogin(login: String, password: String) : Boolean {
-        //ToDo implement login with dataBase connect
-        //ToDo за одно прокинь сюда роль юзер или админ Session.role = Role.valueOf("user or admin")
-        //TODO закодить в RSA
-
-        Log.i("Login", "url: "+url)
-
-        val logPass = login+":"+password
-
-        Log.i("Login", "LogPass: "+logPass)
-        //Log.i("Login", rsa)
-
-        val client = HttpClient(){
-            install(HttpCookies) {
-                // Will keep an in-memory map with all the cookies from previous requests.
-                storage = AcceptAllCookiesStorage()
-
-                // Will ignore Set-Cookie and will send the specified cookies.
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(url, Cookie("register", logPass))
-                }
-                //storage = ConstantCookiesStorage(Cookie("register", logPass))
-            }
-        }
-
-        var data = ""
-
-
-        runBlocking (Dispatchers.IO) {
-            var aaa = client.cookies(url)
-            Log.i("Login", "login cookie: "+aaa[0].toString())
-            data = client.post<String>(url)
-            Log.i("Login", "data: "+data)
-        }
-
-
-
-
-        this.cookieJWT = data
-
-
-        //val publicRsaKey = RSA.getPublicKey(rsa)
-
-        //val encrypted = RSA.encrypt(text, publicRsaKey)
-        //this.cookieJWT = sender.sendPostRequest(text)
-
-        Log.i("Login", "Cookie JWT: "+cookieJWT)
-
-        (activity as MainActivity?)?.setJWT(data)
-
-        return true
     }
 
     companion object {
