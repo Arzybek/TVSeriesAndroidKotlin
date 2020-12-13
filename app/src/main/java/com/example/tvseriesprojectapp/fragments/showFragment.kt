@@ -41,7 +41,7 @@ import java.net.URLEncoder
 class showFragment : Fragment(), View.OnClickListener {
     private var url = "http://${Session.ip}:${Session.port}/"
     private var pos = -1;
-    private var cookie = "";
+    //private var cookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("showFrag", "onCreate")
@@ -54,7 +54,7 @@ class showFragment : Fragment(), View.OnClickListener {
         arguments?.getInt("id")?.let {
             pos = it
         }
-        cookie = (activity as MainActivity).getJWT()
+        //cookie = (activity as MainActivity).getAuthCookie()
     }
 
     override fun onCreateView(
@@ -96,6 +96,7 @@ class showFragment : Fragment(), View.OnClickListener {
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch {
             Log.d("coroutine", "coroutine drawShow launch")
+            var cookie = (activity as MainActivity).getAuthCookie()
             var isWatching = TvShowsRetriever().isWatching(a.id, cookie)
             val addToWatchingButton = Button(cont)
             addToWatchingButton.layoutParams = LinearLayout.LayoutParams(
@@ -167,6 +168,7 @@ class showFragment : Fragment(), View.OnClickListener {
     private fun onEpisodeClickAsync(dynamicButton:Button, epIndex:Int)
     {
         val showID = dynamicButton.getTag(R.id.resourceShowID)
+        val cookie = (activity as MainActivity).getAuthCookie()
 
         val mainActivityJob = Job()
 
@@ -191,6 +193,8 @@ class showFragment : Fragment(), View.OnClickListener {
     private fun onAddToWatchingClickAsync(dynamicButton:Button)
     {
         val showID = dynamicButton.getTag(R.id.resourceShowID)
+
+        val cookie = (activity as MainActivity).getAuthCookie()
 
         val mainActivityJob = Job()
 

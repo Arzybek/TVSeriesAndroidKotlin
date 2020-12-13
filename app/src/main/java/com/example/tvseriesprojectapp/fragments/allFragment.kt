@@ -39,13 +39,13 @@ class allFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    var cookie = "";
-    var clickHandler = ClickListener(cookie)
+    //var cookie = "";
+    var clickHandler = ClickListener("")
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        this.cookie = (activity as MainActivity).getJWT()
-        clickHandler = ClickListener(cookie)
+        var cookie = (activity as MainActivity).getAuthCookie()
+        clickHandler = ClickListener(cookie)  // возможно стоит сделать чтобы clicklistener сам дергал куку
         return inflater.inflate(com.example.tvseriesprojectapp.R.layout.fragment_all, container, false)
     }
 

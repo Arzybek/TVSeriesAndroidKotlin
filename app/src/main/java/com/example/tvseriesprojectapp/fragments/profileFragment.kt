@@ -30,7 +30,9 @@ import io.ktor.client.request.get
 import io.ktor.http.Cookie
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.coroutines.*
+import java.io.File
 import java.lang.Exception
+import kotlin.math.log
 
 
 class profileFragment : Fragment(), View.OnClickListener {
@@ -64,7 +66,7 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        this.cookie = (activity as MainActivity).getJWT()
+        this.cookie = (activity as MainActivity).getAuthCookie()
         clickHandler = ClickListener(cookie)
         super.onCreate(savedInstanceState)
 
@@ -75,7 +77,13 @@ class profileFragment : Fragment(), View.OnClickListener {
 
         var aa = activity.toString()
         Log.i("prof", aa)
-        var jwt = (activity as MainActivity?)?.getJWT()!!
+        val file = File(context?.filesDir, "cookie")
+        var jwt = ""
+        if (file.exists())
+            jwt = file.readText()
+        else
+            jwt = ""
+        //var jwt = (activity as MainActivity?)?.getJWT()!!
         val client = HttpClient(){
             install(HttpCookies) {
                 storage = AcceptAllCookiesStorage()
@@ -175,11 +183,22 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(view:View){
-        Log.i("Profile", "login tapped")
 
-        val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
-        toast.show()
+        if (view != null) {
+            when (view.id) {
+                R.id.logoutProfileButton -> logout()
+            }
+        }
 
+        //val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
+        //toast.show()
+
+    }
+
+
+    private fun logout()
+    {
+        (activity as MainActivity).logout()
     }
 
 

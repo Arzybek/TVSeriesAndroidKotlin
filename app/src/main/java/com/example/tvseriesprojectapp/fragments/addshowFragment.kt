@@ -75,7 +75,7 @@ class addshowFragment : Fragment() {
         product.put("showName", showName.text.toString());
         product.put("episodesCount", epCount.text.toString())
         val result = Klaxon().toJsonString(product)
-        val cookie = (activity as MainActivity).jwtCookie
+        val cookie = (activity as MainActivity).getAuthCookie()
 
         val mainActivityJob = Job()
 

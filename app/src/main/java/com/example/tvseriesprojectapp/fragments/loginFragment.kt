@@ -20,6 +20,7 @@ import io.ktor.client.features.cookies.cookies
 import io.ktor.client.request.post
 import io.ktor.http.Cookie
 import kotlinx.coroutines.*
+import java.io.File
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -35,7 +36,7 @@ class loginFragment : Fragment(), View.OnClickListener{
 
     private var rsa:String = ""
     private var URL:String = ""
-    private var cookieJWT:String = ""
+    //private var cookieJWT:String = ""
 
     private var ip = ""
     private var port = ""
@@ -98,7 +99,6 @@ class loginFragment : Fragment(), View.OnClickListener{
             val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
             toast.show()
             (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
-            //startActivity(Intent(view!!.context, MainActivity::class.java))// здесь возможно стоит как то научиться перебрасывать на фрагмент профиля
         } else {
             Log.i("Login", "Login was failed")
             loginText.setText("")
@@ -145,8 +145,9 @@ class loginFragment : Fragment(), View.OnClickListener{
 
 
 
+        (activity as MainActivity).saveAuthCookie(data)
 
-        this.cookieJWT = data
+        //this.cookieJWT = data
 
 
         //val publicRsaKey = RSA.getPublicKey(rsa)
@@ -154,9 +155,7 @@ class loginFragment : Fragment(), View.OnClickListener{
         //val encrypted = RSA.encrypt(text, publicRsaKey)
         //this.cookieJWT = sender.sendPostRequest(text)
 
-        Log.i("Login", "Cookie JWT: "+cookieJWT)
-
-        (activity as MainActivity?)?.setJWT(data)
+        Log.i("Login", "Cookie JWT: "+data)
 
         return true
     }

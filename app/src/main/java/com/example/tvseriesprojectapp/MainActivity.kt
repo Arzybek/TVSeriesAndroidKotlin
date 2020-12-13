@@ -8,22 +8,27 @@ import com.example.tvseriesprojectapp.fragments.addshowFragment
 import com.example.tvseriesprojectapp.fragments.allFragment
 import com.example.tvseriesprojectapp.fragments.loginFragment
 import com.example.tvseriesprojectapp.fragments.profileFragment
+import io.ktor.util.cio.NoopContinuation.context
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import java.io.File
+
 //import org.jetbrains.anko.doAsync
 //import org.jetbrains.anko.uiThread
 
 class MainActivity : AppCompatActivity() {
     val loginFrag = loginFragment()
-    val profileFrag = profileFragment()
+    var profileFrag = profileFragment()
     val allFragment  = allFragment()
     val addshowFragment = addshowFragment()
-    var jwtCookie = "";
+    private var jwtCookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        this.jwtCookie = loadAuthCookie()
 
         bottom_navigation.setOnNavigationItemSelectedListener{
             when (it.itemId){
@@ -45,6 +50,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.refreshButton -> allFragment.onClick(v)
                 R.id.addShowButton -> addshowFragment.onClick(v)
                 R.id.addShowProfileButton -> makeCurrentFragment(addshowFragment)
+                R.id.logoutProfileButton -> {profileFrag.onClick(v)}
             }
         }
     }
@@ -64,6 +70,44 @@ class MainActivity : AppCompatActivity() {
         }
         //replace(R.id.fl_wrapper, fragment)
         commit()
+    }
+
+    fun logout()
+    {
+        deleteAuthCookie()
+        profileFrag = profileFragment()
+        makeCurrentFragment(profileFrag)
+    }
+
+    fun loadAuthCookie() : String
+    {
+        val file = File(filesDir, "cookie")
+        if (file.exists())
+            return file.readText()
+        else
+            return ""
+    }
+
+    fun saveAuthCookie(cookie: String)
+    {
+        val file = File(filesDir, "cookie")
+        if (file.exists())
+            file.delete()
+        file.writeText(cookie)
+        this.jwtCookie = cookie
+    }
+
+    fun deleteAuthCookie()
+    {
+        val file = File(filesDir, "cookie")
+        if (file.exists())
+            file.delete()
+        this.jwtCookie = ""
+    }
+
+    fun getAuthCookie():String
+    {
+        return this.jwtCookie
     }
 
 //    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -92,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 //        transaction.commit()
 //    }
 
-    fun setJWT(jwt:String)
+    /*fun setJWT(jwt:String)
     {
         this.jwtCookie = jwt;
     }
@@ -100,5 +144,5 @@ class MainActivity : AppCompatActivity() {
     fun getJWT():String
     {
         return this.jwtCookie;
-    }
+    }*/
 }
