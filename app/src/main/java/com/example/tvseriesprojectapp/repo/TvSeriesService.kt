@@ -13,7 +13,7 @@ interface TvSeriesService {
     suspend fun searchRepositoriesUser(@Header("Cookie") auth: String): List<TvShow>
 
     @GET("/tvshows/{showID}")
-    suspend fun getShow(@Path("showID") showID:String) : TvShow
+    suspend fun getShow(@Path("showID") showID:Long) : TvShow
 
     @POST("/user/addWatching")
     suspend fun watchingShow(@Query("showID") showID:String, @Header("Cookie") auth: String)
@@ -31,7 +31,7 @@ interface TvSeriesService {
     suspend fun isWatchingShow(@Query("showID") showID:String, @Header("Cookie") auth: String):Boolean
 
     @GET("/user/watchedEpisodes")
-    suspend fun getWatchedEpisodes(@Query("showID") showID:String, @Header("Cookie") auth: String):Array<Boolean>
+    suspend fun getWatchedEpisodes(@Query("showID") showID:String, @Header("Cookie") auth: String):BooleanArray
 
     @POST("/user/addUserWatchingShow")
     suspend fun addUserShow(@Query("info") info:String, @Header("Cookie") auth: String)

@@ -1,5 +1,6 @@
 package com.example.tvseriesprojectapp.repo
 
+import android.util.Log
 import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.user.Session
 import io.ktor.http.*
@@ -53,18 +54,21 @@ class TvShowsRetriever {
 
     suspend fun getShow(showID:Long) : TvShow
     {
-        return service.getShow(showID.toString())
+        Log.d("retrofit", "getShow "+showID.toString())
+        return service.getShow(showID)
     }
 
 
     suspend fun watchingShow(showID: Long, cookie:String)
     {
+        Log.d("retrofit", "watchingShow "+showID.toString()+" "+cookie)
         var cookieToSend = "auth="+cookie
         service.watchingShow(showID.toString(), cookieToSend)
     }
 
     suspend fun unwatchingShow(showID: Long, cookie:String)
     {
+        Log.d("retrofit", "unwatchingShow "+showID.toString()+" "+cookie)
         var cookieToSend = "auth="+cookie
         service.unwatchingShow(showID.toString(), cookieToSend)
     }
@@ -72,30 +76,35 @@ class TvShowsRetriever {
 
     suspend fun watchingEpisode(showID: Long, episodeID:Long, cookie:String)
     {
+        Log.d("retrofit", "watchingEpisode "+showID.toString()+" "+episodeID.toString()+" "+cookie)
         var cookieToSend = "auth="+cookie
         service.watchingEpisode(showID.toString(), episodeID.toString(), cookieToSend)
     }
 
     suspend fun unwatchingEpisode(showID: Long, episodeID:Long, cookie:String)
     {
+        Log.d("retrofit", "unwatchingEpisode "+showID.toString()+" "+episodeID.toString()+" "+cookie)
         var cookieToSend = "auth="+cookie
         service.unwatchingEpisode(showID.toString(), episodeID.toString(), cookieToSend)
     }
 
     suspend fun isWatching(showID: Long, cookie:String):Boolean
     {
+        Log.d("retrofit", "isWatching "+showID.toString()+" "+cookie)
         var cookieToSend = "auth="+cookie
         return service.isWatchingShow(showID.toString(), cookieToSend)
     }
 
-    suspend fun getWatchedEpisodes(showID: Long, cookie:String):Array<Boolean>
+    suspend fun getWatchedEpisodes(showID: Long, cookie:String):BooleanArray
     {
         var cookieToSend = "auth="+cookie
+        Log.d("retrofit", "getWatchedEpisodes "+showID.toString()+" "+cookieToSend)
         return service.getWatchedEpisodes(showID.toString(), cookieToSend)
     }
 
     suspend fun addUserShow(showData:String, cookie:String)
     {
+        Log.d("retrofit", "addUserShow "+showData+" "+cookie)
         var cookieToSend = "auth="+cookie
         service.addUserShow(showData, cookieToSend)
     }
