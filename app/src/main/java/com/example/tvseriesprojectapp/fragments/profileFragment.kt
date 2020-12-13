@@ -86,7 +86,7 @@ class profileFragment : Fragment(), View.OnClickListener {
         coroutineScope.launch {
             Log.d("coroutine", "coroutine onResumeProfile launch")
             var user = ProfileAdapter().getProfile(cookie)
-            if (user.name==null)
+            if (user==null || user.name==null || user.name=="")
                 drawNoUser()
             else
             {
@@ -101,44 +101,11 @@ class profileFragment : Fragment(), View.OnClickListener {
                 }
             }
         }
-
-        /*val client = HttpClient(){
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(url, Cookie("auth", cookie))
-                }
-            }
-        }
-
-        var data = ""
-
-        runBlocking(Dispatchers.IO) {
-            data = client.get<String>(url)
-            Log.i("aaa", data)
-        }
-
-        Log.i("profile", data)
-        Log.i("JWT", cookie)
-
-        if (data.equals(""))
-            drawNoUser()
-        else
-            drawUser(data)
-
-        if(cookie!="") {
-            retrieveShows()
-            refreshButtonProfile.setOnClickListener {
-                retrieveShows()
-            }
-        }*/
     }
 
     fun retrieveShows() {
-        //1 Create a Coroutine scope using a job to be able to cancel when needed
         recyclerProfile.layoutManager = LinearLayoutManager(mContext)
         val mainActivityJob = Job()
-        //2 Handle exceptions if any
         val errorHandler = CoroutineExceptionHandler { _, exception ->
             mContext?.let {
                 AlertDialog.Builder(it).setTitle("Error")
@@ -148,10 +115,8 @@ class profileFragment : Fragment(), View.OnClickListener {
             }
         }
 
-        //3 the Coroutine runs using the Main (UI) dispatcher
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch(errorHandler) {
-            //4
             val resultList = TvShowsRetriever().getRepositoriesUser("auth="+cookie)
             result = resultList
             val result = RepoResult(resultList)
