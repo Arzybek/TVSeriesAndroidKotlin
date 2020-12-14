@@ -34,5 +34,5 @@ interface TvSeriesService {
     suspend fun getWatchedEpisodes(@Query("showID") showID:String, @Header("Cookie") auth: String):BooleanArray
 
     @POST("/user/addUserWatchingShow")
-    suspend fun addUserShow(@Query("info") info:String, @Header("Cookie") auth: String)
+    suspend fun addUserShow(@Body info:String, @Header("Cookie") auth: String)
 }
