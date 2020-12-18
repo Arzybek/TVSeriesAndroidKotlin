@@ -35,4 +35,16 @@ interface TvSeriesService {
 
     @POST("/user/addUserWatchingShow")
     suspend fun addUserShow(@Body info:String, @Header("Cookie") auth: String)
+
+    @POST("/user/rateShow")
+    suspend fun rateShow(@Query("rating") rating:String, @Query("showID") showID:String, @Header("Cookie") auth: String)
+
+    @GET("/user/rating")
+    suspend fun getUserRating(@Query("showID") showID:String, @Header("Cookie") auth: String):Float
+
+    @POST("/user/reviewShow")
+    suspend fun reviewShow(@Body review:String, @Query("showID") showID:String, @Header("Cookie") auth: String)
+
+    @GET("/user/review")
+    suspend fun getUserReview(@Query("showID") showID:String, @Header("Cookie") auth: String):String
 }

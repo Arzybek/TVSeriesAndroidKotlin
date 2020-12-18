@@ -55,6 +55,32 @@
             android:textColor="@color/colorPrimary"
             android:textSize="45sp" />
 
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:rating="0.0"
+        android:layout_gravity="center"/>
+
+    <EditText
+        android:id="@+id/review"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Reception"
+        />
+
+    <Button
+        android:id="@+id/addReviewButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="25dp"
+        android:onClick="onClick"
+        android:text="Send Review"
+        android:textSize="25sp" />
+
 </LinearLayout>
 
 </ScrollView>

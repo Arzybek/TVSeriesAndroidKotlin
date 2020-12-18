@@ -46,4 +46,5 @@ class ProfileAdapter {
         return service.insecureRegister(cookieToSend)
     }
 
+
 }

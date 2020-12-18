@@ -3,12 +3,15 @@ package com.example.tvseriesprojectapp.repo
 import android.util.Log
 import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.user.Session
+import com.google.gson.GsonBuilder
 import io.ktor.http.*
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
 
 
@@ -35,12 +38,19 @@ class TvShowsRetriever {
     }
 
     init {
+
+        val gson = GsonBuilder()
+                .setLenient()
+                .create()
         // 2
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(ScalarsConverterFactory.create()) //important
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
 //            .client(OkHttpClient().newBuilder().cookieJar(SessionCookieJar()).build())
             .build()
+
 
         service = retrofit.create(TvSeriesService::class.java)
     }
@@ -108,5 +118,29 @@ class TvShowsRetriever {
         Log.d("retrofit", "addUserShow "+showData+" "+cookie)
         var cookieToSend = "auth="+cookie
         service.addUserShow(showData, cookieToSend)
+    }
+
+    suspend public fun ratingShow(rating:Float, showID: Long, cookie:String)
+    {
+        var cookieToSend = "auth="+cookie
+        service.rateShow(rating.toString(), showID.toString(), cookieToSend)
+    }
+
+    suspend public fun getUserRating(showID: Long, cookie:String):Float
+    {
+        var cookieToSend = "auth="+cookie
+        return service.getUserRating(showID.toString(), cookieToSend)
+    }
+
+    suspend public fun sendReview(review:String, showID: Long, cookie:String)
+    {
+        var cookieToSend = "auth="+cookie
+        service.reviewShow(review, showID.toString(), cookieToSend)
+    }
+
+    suspend public fun getReview(showID: Long, cookie:String):String
+    {
+        var cookieToSend = "auth="+cookie
+        return service.getUserReview(showID.toString(), cookieToSend)
     }
 }
