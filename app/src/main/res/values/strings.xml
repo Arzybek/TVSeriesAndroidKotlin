@@ -15,4 +15,6 @@
     <string name="no_age">no_age</string>
     <string name="episode_name">episode name</string>
     <string name="episode_description">episode description</string>
+    <string name="addshow">add show</string>
+    <string name="logout">logout</string>
 </resources>
