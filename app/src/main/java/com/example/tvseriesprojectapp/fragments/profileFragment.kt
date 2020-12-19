@@ -29,11 +29,7 @@ import java.lang.Exception
 class profileFragment : Fragment(), View.OnClickListener {
     public var result: List<TvShow> = listOf()
 
-    private var ip = Session.ip
-    private var port = Session.port
-    private var url = "http://${ip}:${port}/profile"
-    private var cookie = ""
-    var clickHandler = ClickListener(cookie)
+    var clickHandler = ClickListener()
 
     private var mContext: Context? = null
     override fun onAttach(context: Context) {
@@ -41,7 +37,7 @@ class profileFragment : Fragment(), View.OnClickListener {
         mContext = context
     }
 
-    inner class ClickListener(val cookie: String): RepoListAdapter.OnItemClickListener{
+    inner class ClickListener(): RepoListAdapter.OnItemClickListener{
         override fun onItemClick(position: Int) {
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             var bundle = Bundle()
@@ -57,8 +53,8 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        this.cookie = (activity as MainActivity).getAuthCookie()
-        clickHandler = ClickListener(cookie)
+        //this.cookie = (activity as MainActivity).getAuthCookie()
+        clickHandler = ClickListener()
         super.onCreate(savedInstanceState)
 
     }
@@ -80,12 +76,11 @@ class profileFragment : Fragment(), View.OnClickListener {
             {
                 Log.i("profile", user.name)
                 drawUser(user)
-            }
-
-            if(cookie!="") {
-                retrieveShows()
-                refreshButtonProfile.setOnClickListener {
+                if(cookie!="") {
                     retrieveShows()
+                    refreshButtonProfile.setOnClickListener {
+                        retrieveShows()
+                    }
                 }
             }
         }
@@ -105,6 +100,7 @@ class profileFragment : Fragment(), View.OnClickListener {
 
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch(errorHandler) {
+            var cookie = (activity as MainActivity).getAuthCookie()
             val resultList = TvShowsRetriever().getRepositoriesUser("auth="+cookie)
             result = resultList
             val result = RepoResult(resultList)
