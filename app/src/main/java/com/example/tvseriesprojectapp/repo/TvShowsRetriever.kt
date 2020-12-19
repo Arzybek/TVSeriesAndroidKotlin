@@ -106,11 +106,11 @@ class TvShowsRetriever {
         return service.isWatchingShow(showID.toString(), cookieToSend)
     }
 
-    suspend fun getWatchedEpisodes(showID: Long, cookie:String):BooleanArray
+    suspend fun getWatchedEpisodes(showID: Long, cookie:String):List<Boolean>
     {
         var cookieToSend = "auth="+cookie
         Log.d("retrofit", "getWatchedEpisodes "+showID.toString()+" "+cookieToSend)
-        return service.getWatchedEpisodes(showID.toString(), cookieToSend)
+        return service.getWatchedEpisodes(showID.toString(), cookieToSend).toList()
     }
 
     suspend fun addUserShow(showData:String, cookie:String)

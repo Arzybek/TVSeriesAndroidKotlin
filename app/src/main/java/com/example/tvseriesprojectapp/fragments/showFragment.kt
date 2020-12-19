@@ -7,23 +7,27 @@ import android.graphics.Color
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.LinearLayout
-import android.widget.RatingBar.OnRatingBarChangeListener
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
+import com.example.tvseriesprojectapp.dto.Episode
+import com.example.tvseriesprojectapp.dto.EpisodeSerias
 import com.example.tvseriesprojectapp.dto.TvShow
+import com.example.tvseriesprojectapp.repo.RepoListAdapterSerias
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.math.RoundingMode
+import org.jetbrains.anko.toast
 import java.net.URL
 
 
@@ -46,9 +50,11 @@ class showFragment : Fragment(), View.OnClickListener {
         //cookie = (activity as MainActivity).getAuthCookie()
     }
 
+    var currentShow: TvShow? = null;
+
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         Log.d("showFragment", "oncreatview")
 
@@ -60,6 +66,7 @@ class showFragment : Fragment(), View.OnClickListener {
         coroutineScope.launch {
             Log.d("coroutine", "coroutine launch")
             val resultShow = TvShowsRetriever().getShow(pos.toLong())
+            currentShow = resultShow
             drawShow(mContainer, resultShow)
         }
 
@@ -67,25 +74,31 @@ class showFragment : Fragment(), View.OnClickListener {
         return mContainer
     }
 
-
-    private fun drawShow(mContainer: View, a: TvShow): View {
+    private fun drawShow(mContainer: View, show: TvShow): View {
         val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
-        linearLayout.findViewById<TextView>(R.id.show_name).setText(a.name)
-        linearLayout.findViewById<TextView>(R.id.show_category).setText(a.category)
-        linearLayout.findViewById<TextView>(R.id.show_year).setText(a.year.toString())
-        val url = url + "tvshows/image/" + a.imgLink
+        linearLayout.findViewById<TextView>(R.id.show_name).setText(show.name)
+        linearLayout.findViewById<TextView>(R.id.show_category).setText(show.category)
+        linearLayout.findViewById<TextView>(R.id.show_year).setText(show.year.toString())
+        //ToDO set description
+        linearLayout.findViewById<TextView>(R.id.editTextTextMultiLine).setText("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        val url = url + "tvshows/image/" + show.imgLink
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
                 .execute(url)
 
         var mRatingBar = linearLayout.findViewById(R.id.ratingBar) as RatingBar;
-        //var mRatingText = linearLayout.findViewById(R.id.ResText) as TextView;
 
-        mRatingBar.onRatingBarChangeListener = OnRatingBarChangeListener { ratingBar, rating, fromUser ->
-            onRatingChangeAsync(ratingBar, rating, fromUser, a.id)
-            //mRatingText.text = "Выбрано звезд: $rating"
-        }
 
-        (linearLayout.findViewById(R.id.addReviewButton) as Button).setOnClickListener({ onSendReviewClickAsync(a.id)})
+       mRatingBar.onRatingBarChangeListener =
+           RatingBar.OnRatingBarChangeListener { ratingBar, rating, fromUser ->
+               onRatingChangeAsync(ratingBar, rating, fromUser, show.id)
+
+           }
+
+        (linearLayout.findViewById(R.id.addReviewButton) as Button).setOnClickListener({
+            onSendReviewClickAsync(
+                show.id
+            )
+        })
 
 
 
@@ -97,25 +110,27 @@ class showFragment : Fragment(), View.OnClickListener {
             coroutineScope.launch {
                 Log.d("coroutine", "coroutine drawShow launch")
                 var cookie = (activity as MainActivity).getAuthCookie()
-                var isWatching = TvShowsRetriever().isWatching(a.id, cookie)
-                val addToWatchingButton = Button(cont)
+                var isWatching = TvShowsRetriever().isWatching(show.id, cookie)
+                val addToWatchingButton = linearLayout.findViewById(R.id.showIsWatch) as Button
                 var params = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 var ratingText = (linearLayout.findViewById(R.id.show_rating) as TextView)
-                var rating = TvShowsRetriever().getShowRating(a.id)
-                var rounded = Math.round(rating*100).toDouble()/100
+                var rating = TvShowsRetriever().getShowRating(show.id)
+                var rounded = Math.round(rating * 100).toDouble()/100
                 ratingText.setText(rounded.toString())
 
+                //mRatingBar.rating = TvShowsRetriever().getUserRating(show.id, cookie)
 
-                mRatingBar.rating = TvShowsRetriever().getUserRating(a.id, cookie)
+                var review = TvShowsRetriever().getReview(show.id, cookie)
 
-                var review = TvShowsRetriever().getReview(a.id, cookie)
+                (linearLayout.findViewById(R.id.review) as EditText).setText(
+                    review,
+                    TextView.BufferType.EDITABLE
+                )
 
-                (linearLayout.findViewById(R.id.review) as EditText).setText(review, TextView.BufferType.EDITABLE)
-
-                var reviews = TvShowsRetriever().getRandomReviews(5, a.id)
+                var reviews = TvShowsRetriever().getRandomReviews(5, show.id)
 
                 for (i in 0..reviews.size-1) {
                     val dynamicText = TextView(cont)
@@ -125,7 +140,7 @@ class showFragment : Fragment(), View.OnClickListener {
 
 //            addToWatchingButton.x = 20.0F;
 //            addToWatchingButton.y = 0F;
-                addToWatchingButton.setTag(R.id.resourceShowID, a.id)
+                addToWatchingButton.setTag(R.id.resourceShowID, show.id)
                 if (isWatching) {
                     addToWatchingButton.isActivated = true
                     addToWatchingButton.setBackgroundColor(Color.GREEN)
@@ -135,62 +150,49 @@ class showFragment : Fragment(), View.OnClickListener {
                 }
                 addToWatchingButton.text = "Watching"
 
-                val scale = resources.displayMetrics.density
-                val dpAsPixels = (10 * scale + 0.5f)
-                Log.d("aa", dpAsPixels.toString())
-                params.setMargins(dpAsPixels.toInt(), dpAsPixels.toInt(), 0, 0)
-                addToWatchingButton.textAlignment = Button.TEXT_ALIGNMENT_CENTER
-
                 addToWatchingButton.setOnClickListener {
                     onAddToWatchingClickAsync(addToWatchingButton);
                 }
-                linearLayout.addView(addToWatchingButton, params);
 
-                var watchedEpisodes = TvShowsRetriever().getWatchedEpisodes(a.id, cookie)
-                for (i in 0..a.episodes.size - 1) {
-                    val dynamicButton = Button(cont)
-                    dynamicButton.id = i;
-//                dynamicButton.layoutParams = LinearLayout.LayoutParams(
-//                        LinearLayout.LayoutParams.WRAP_CONTENT,
-//                        LinearLayout.LayoutParams.WRAP_CONTENT
-//                )
-//                dynamicButton.x = 20.0F;
-//                dynamicButton.y = i * 100 + 120.0F;
-                    dynamicButton.setTag(R.id.resourceShowID, a.id)
-                    dynamicButton.setTag(R.id.resourceEpisodeID, a.episodes.get(i).id)
-                    if (watchedEpisodes.size < i + 1) {
-                        dynamicButton.isActivated = false
-                        dynamicButton.setBackgroundColor(Color.GRAY)
-                    } else {
-                        if (watchedEpisodes[i] == false) {
-                            dynamicButton.isActivated = false
-                            dynamicButton.setBackgroundColor(Color.GRAY)
-                        } else {
-                            dynamicButton.isActivated = true
-                            dynamicButton.setBackgroundColor(Color.GREEN)
-                        }
-                    }
-                    if (a.episodes.get(i).description == "NULL" || a.episodes.get(i).description == null)
-                        dynamicButton.text = "episode ${i+1}"
-                    else
-                        dynamicButton.text = "episode $i: " + a.episodes.get(i).description
+                var watchedEpisodes = TvShowsRetriever().getWatchedEpisodes(show.id, cookie)
+                val episodeView = linearLayout.findViewById<RecyclerView>(R.id.episodeView)
+                episodeView.refreshDrawableState()
+                val e = show.episodes.zip(watchedEpisodes).forEach{ pair -> pair.first.isWatched = pair.second }
+                episodeView.layoutManager = GridLayoutManager(linearLayout.context, 5)
+                episodeView.adapter = RepoListAdapterSerias(
+                    EpisodeSerias(show.episodes), ClickListener(
+                        episodeView
+                    )
+                )
 
-                    dynamicButton.setOnClickListener {
-                        onEpisodeClickAsync(dynamicButton, i);
-                    }
-                    dynamicButton.textAlignment = Button.TEXT_ALIGNMENT_CENTER
-
-                    linearLayout.addView(dynamicButton, params);
-                }
             }
 
             return mContainer
         }
 
 
+    inner class ClickListener(val rv: RecyclerView): RepoListAdapterSerias.OnItemClickListener{
+        override fun onItemClick(position: Int) {
+            if (currentShow == null) return
+            context?.toast("press episode - " + position)
+            val episode: Episode = currentShow!!.episodes[position]
 
-    private fun onEpisodeClickAsync(dynamicButton: Button, epIndex: Int) {
-        val showID = dynamicButton.getTag(R.id.resourceShowID)
+            if (episode.isWatched)
+            {
+                onEpisodeClickAsync(false, position)
+                episode.isWatched = false
+            }
+            else
+            {
+                onEpisodeClickAsync(true, position)
+                episode.isWatched = true
+            }
+        }
+    }
+
+    private fun onEpisodeClickAsync(value: Boolean, epIndex: Int) {
+        if (currentShow == null) return
+        val showID = currentShow!!.id
         val cookie = (activity as MainActivity).getAuthCookie()
 
         val mainActivityJob = Job()
@@ -198,13 +200,9 @@ class showFragment : Fragment(), View.OnClickListener {
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch {
             Log.d("coroutine", "coroutine onEpisodeClick launch")
-            if (dynamicButton.isActivated) {
-                dynamicButton.isActivated = false
-                dynamicButton.setBackgroundColor(Color.GRAY)
+            if (!value) {
                 TvShowsRetriever().unwatchingEpisode(showID as Long, epIndex.toLong(), cookie)
             } else {
-                dynamicButton.isActivated = true
-                dynamicButton.setBackgroundColor(Color.GREEN)
                 TvShowsRetriever().watchingEpisode(showID as Long, epIndex.toLong(), cookie)
             }
         }
@@ -234,7 +232,12 @@ class showFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun onRatingChangeAsync(ratingBar:RatingBar, rating:Float, fromUser:Boolean, showID:Long)
+    private fun onRatingChangeAsync(
+        ratingBar: RatingBar,
+        rating: Float,
+        fromUser: Boolean,
+        showID: Long
+    )
     {
         val cookie = (activity as MainActivity).getAuthCookie()
 
@@ -248,7 +251,7 @@ class showFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun onSendReviewClickAsync(showID:Long)
+    private fun onSendReviewClickAsync(showID: Long)
     {
         val cookie = (activity as MainActivity).getAuthCookie()
 

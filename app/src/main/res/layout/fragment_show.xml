@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollViewShow"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:padding="7dp"
     android:scrollbars="none" >
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/testLayout"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
+<LinearLayout
+    android:id="@+id/testLayout"
+    android:layout_width="match_parent"
         android:layout_height="match_parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        tools:context=".fragments.showFragment"
+    tools:context=".fragments.showFragment"
         android:orientation="vertical"
         >
 
@@ -32,82 +32,133 @@
                 android:contentDescription="@string/show_pic_descr" />
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/show_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/show_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/show_year"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="18sp" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-            <TextView
-                    android:id="@+id/show_year"
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Средняя оценка:"
+                    />
+
+                <TextView
+                    android:id="@+id/show_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="45sp" />
 
-            <TextView
-                    android:id="@+id/show_category"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="45sp" />
-
-            <TextView
-                    android:id="@+id/show_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="45sp" />
+                    android:paddingStart="10dp"
+                    android:textColor="@color/cardview_dark_background"
+                    android:textSize="18sp" />
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-            android:id="@+id/episodeView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-
 
     <TextView
-        android:id="@+id/show_rating"
+        android:id="@+id/showDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:textColor="@color/colorPrimary"
-        android:textSize="45sp" />
+        android:paddingStart="20dp"
+        android:text="Описание сериала:" />
 
-    <RatingBar
-        android:id="@+id/ratingBar"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/editTextTextMultiLine"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:numStars="5"
-        android:stepSize="1.0"
-        android:rating="0.0"
-        android:layout_gravity="center"/>
+        android:ems="10"
+        android:paddingStart="10dp"
+        android:gravity="start|top"
+        android:inputType="textMultiLine" />
 
-    <EditText
-        android:id="@+id/review"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Reception"
-        />
+        android:paddingStart="20dp"
+        android:text="Эпизоды:" />
 
-    <Button
-        android:id="@+id/addReviewButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="25dp"
-        android:onClick="onClick"
-        android:text="Send Review"
-        android:textSize="25sp" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/episodeView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/border">
+
+    </android.support.v7.widget.RecyclerView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/review"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Reception" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/showIsWatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="I watch it" />
+
+        <Button
+            android:id="@+id/addReviewButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="Send Review"
+            android:textSize="25sp" />
+    </LinearLayout>
 
 </LinearLayout>
 
