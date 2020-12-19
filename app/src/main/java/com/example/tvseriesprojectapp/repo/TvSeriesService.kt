@@ -47,4 +47,10 @@ interface TvSeriesService {
 
     @GET("/user/review")
     suspend fun getUserReview(@Query("showID") showID:String, @Header("Cookie") auth: String):String
+
+    @GET("/tvshows/rating")
+    suspend fun getShowRating(@Query("showID") showID:String):Float
+
+    @GET("/tvshows/randomReviews")
+    suspend fun getRandomReviews(@Query("amount") amount:String, @Query("showID") showID:String):ArrayList<String>
 }

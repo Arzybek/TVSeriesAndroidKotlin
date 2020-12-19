@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.math.RoundingMode
 import java.net.URL
 
 
@@ -102,11 +103,25 @@ class showFragment : Fragment(), View.OnClickListener {
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 )
+                var ratingText = (linearLayout.findViewById(R.id.show_rating) as TextView)
+                var rating = TvShowsRetriever().getShowRating(a.id)
+                var rounded = Math.round(rating*100).toDouble()/100
+                ratingText.setText(rounded.toString())
+
+
                 mRatingBar.rating = TvShowsRetriever().getUserRating(a.id, cookie)
 
                 var review = TvShowsRetriever().getReview(a.id, cookie)
 
                 (linearLayout.findViewById(R.id.review) as EditText).setText(review, TextView.BufferType.EDITABLE)
+
+                var reviews = TvShowsRetriever().getRandomReviews(5, a.id)
+
+                for (i in 0..reviews.size-1) {
+                    val dynamicText = TextView(cont)
+                    dynamicText.setText(reviews.get(i))
+                    linearLayout.addView(dynamicText, params);
+                }
 
 //            addToWatchingButton.x = 20.0F;
 //            addToWatchingButton.y = 0F;

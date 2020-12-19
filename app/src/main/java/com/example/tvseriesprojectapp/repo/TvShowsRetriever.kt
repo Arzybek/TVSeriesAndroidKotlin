@@ -143,4 +143,14 @@ class TvShowsRetriever {
         var cookieToSend = "auth="+cookie
         return service.getUserReview(showID.toString(), cookieToSend)
     }
+
+    suspend public fun getShowRating(showID: Long):Float
+    {
+        return service.getShowRating(showID.toString());
+    }
+
+    suspend public fun getRandomReviews(amount:Int, showID: Long):ArrayList<String>
+    {
+        return service.getRandomReviews(amount.toString(), showID.toString());
+    }
 }
