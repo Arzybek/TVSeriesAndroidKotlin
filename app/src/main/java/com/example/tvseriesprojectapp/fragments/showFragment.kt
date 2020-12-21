@@ -34,7 +34,6 @@ import java.net.URL
 class showFragment : Fragment(), View.OnClickListener {
     private var url = "http://${Session.ip}:${Session.port}/"
     private var pos = -1;
-    //private var cookie = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("showFrag", "onCreate")
@@ -47,7 +46,6 @@ class showFragment : Fragment(), View.OnClickListener {
         arguments?.getInt("id")?.let {
             pos = it
         }
-        //cookie = (activity as MainActivity).getAuthCookie()
     }
 
     var currentShow: TvShow? = null;
@@ -94,15 +92,16 @@ class showFragment : Fragment(), View.OnClickListener {
 
            }
 
-        (linearLayout.findViewById(R.id.addReviewButton) as Button).setOnClickListener({
-            onSendReviewClickAsync(
+        (linearLayout.findViewById(R.id.commentsButton) as Button).setOnClickListener({
+            onCommentsClick(
                 show.id
             )
         })
 
 
 
-            var cont = this.context
+
+        var cont = this.context
 
             val mainActivityJob = Job()
 
@@ -122,21 +121,6 @@ class showFragment : Fragment(), View.OnClickListener {
                 ratingText.setText(rounded.toString())
 
                 //mRatingBar.rating = TvShowsRetriever().getUserRating(show.id, cookie)
-
-                var review = TvShowsRetriever().getReview(show.id, cookie)
-
-                (linearLayout.findViewById(R.id.review) as EditText).setText(
-                    review,
-                    TextView.BufferType.EDITABLE
-                )
-
-                var reviews = TvShowsRetriever().getRandomReviews(5, show.id)
-
-                for (i in 0..reviews.size-1) {
-                    val dynamicText = TextView(cont)
-                    dynamicText.setText(reviews.get(i))
-                    linearLayout.addView(dynamicText, params);
-                }
 
 //            addToWatchingButton.x = 20.0F;
 //            addToWatchingButton.y = 0F;
@@ -251,17 +235,17 @@ class showFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun onSendReviewClickAsync(showID: Long)
+    private fun onCommentsClick(showID:Long)
     {
-        val cookie = (activity as MainActivity).getAuthCookie()
-
-        val mainActivityJob = Job()
-
-        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
-        coroutineScope.launch {
-            Log.d("coroutine", "coroutine onRatingChangeAsync launch")
-            val review =view!!.findViewById<EditText>(R.id.review).text.toString()
-            TvShowsRetriever().sendReview(review, showID, cookie)
+        val transaction = activity?.supportFragmentManager?.beginTransaction()
+        var bundle = Bundle()
+        bundle.putLong("showID", showID)
+        if (transaction != null) {
+            val fragment = CommentsFragment()
+            fragment.arguments = bundle
+            transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
+            transaction.disallowAddToBackStack()
+            transaction.commit()
         }
     }
 

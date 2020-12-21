@@ -124,11 +124,6 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/review"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="Reception" />
 
         <RatingBar
             android:id="@+id/ratingBar"
@@ -151,12 +146,13 @@
             android:layout_weight="1"
             android:text="I watch it" />
 
+
         <Button
-            android:id="@+id/addReviewButton"
+            android:id="@+id/commentsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onClick"
-            android:text="Send Review"
+            android:text="Comments"
             android:textSize="25sp" />
     </LinearLayout>
 

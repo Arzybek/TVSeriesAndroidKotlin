@@ -4,10 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.View
-import com.example.tvseriesprojectapp.fragments.addshowFragment
-import com.example.tvseriesprojectapp.fragments.allFragment
-import com.example.tvseriesprojectapp.fragments.loginFragment
-import com.example.tvseriesprojectapp.fragments.profileFragment
+import com.example.tvseriesprojectapp.fragments.*
 import io.ktor.util.cio.NoopContinuation.context
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
