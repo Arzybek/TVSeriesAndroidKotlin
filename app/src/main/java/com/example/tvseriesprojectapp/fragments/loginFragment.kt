@@ -109,11 +109,18 @@ class loginFragment : Fragment(), View.OnClickListener{
         coroutineScope.launch {
             Log.d("coroutine", "coroutine tryLogin launch")
             var data = ProfileAdapter().insecureRegister(logPass)
-            (activity as MainActivity).saveAuthCookie(data)
-            val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
-            toast.show()
-            (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
-
+            if (data=="ERROR")
+            {
+                val toast: Toast = Toast.makeText(view!!.context, "Wrong login or password", Toast.LENGTH_LONG);
+                toast.show()
+            }
+            else
+            {
+                (activity as MainActivity).saveAuthCookie(data)
+                val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
+                toast.show()
+                (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
+            }
         }
     }
 
