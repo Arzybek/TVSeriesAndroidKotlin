@@ -9,6 +9,9 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import com.example.tvseriesprojectapp.*
 import com.example.tvseriesprojectapp.dto.RepoResult
 import com.example.tvseriesprojectapp.dto.TvShow
@@ -22,7 +25,7 @@ import kotlinx.coroutines.launch
 
 
 class allFragment : Fragment(), View.OnClickListener {
-    public var result: List<TvShow> = listOf()
+    public var result: List<List<TvShow>> = listOf()
 
     inner class ClickListener(val cookie: String): RepoListAdapter.OnItemClickListener{
         override fun onItemClick(position: Int) {
@@ -60,9 +63,9 @@ class allFragment : Fragment(), View.OnClickListener {
         root.layoutManager = LinearLayoutManager(mContext)
 //        this.cookie = (activity as MainActivity).getJWT()
         retrieveRepositories()
-        refreshButton.setOnClickListener {
-            retrieveRepositories()
-        }
+//        refreshButton.setOnClickListener {
+//            retrieveRepositories()
+//        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +84,23 @@ class allFragment : Fragment(), View.OnClickListener {
 //        refreshButton.setOnClickListener {
 //            retrieveRepositories()
 //        }
+    }
+
+    fun refreshPage(i: Int) {
+        root.layoutManager = LinearLayoutManager(mContext)
+        val mainActivityJob = Job()
+        val errorHandler = CoroutineExceptionHandler { _, exception ->
+            mContext?.let {
+                AlertDialog.Builder(it).setTitle("Error")
+                    .setMessage(exception.message)
+                    .setPositiveButton(R.string.ok) { _, _ -> }
+                    .setIcon(R.drawable.ic_dialog_alert).show()
+            }
+        }
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch(errorHandler) {
+            root.adapter = RepoListAdapter(RepoResult(result[i]), clickHandler)
+        }
     }
 
     fun retrieveRepositories() {
@@ -104,8 +124,19 @@ class allFragment : Fragment(), View.OnClickListener {
             //4
             val resultList = TvShowsRetriever().getRepositories()
             result = resultList
-            val result = RepoResult(resultList)
+            val result = RepoResult(resultList[0])
             root.adapter = RepoListAdapter(result, clickHandler)
+            addPageButtons()
+        }
+    }
+
+    fun addPageButtons(){
+        for(j in 1..result.size){
+            var button = Button(mContext)
+            button.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            button.text = (j).toString()
+            button.setOnClickListener { refreshPage(j-1) }
+            buttons.addView(button);
         }
     }
 

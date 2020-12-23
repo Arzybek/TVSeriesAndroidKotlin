@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton1 -> loginFrag.onClick(v)
-                R.id.refreshButton -> allFragment.onClick(v)
+//                R.id.refreshButton -> allFragment.onClick(v)
                 R.id.addShowButton -> addshowFragment.onClick(v)
                 R.id.addShowProfileButton -> makeCurrentFragment(addshowFragment)
                 R.id.logoutProfileButton -> {profileFrag.onClick(v)}

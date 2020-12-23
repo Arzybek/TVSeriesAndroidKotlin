@@ -27,7 +27,7 @@
         android:textSize="25sp" />
 
     <TextView
-        android:id="@+id/editTextTextMultiLine"
+        android:id="@+id/showDescriptionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"

@@ -10,8 +10,8 @@ import com.example.tvseriesprojectapp.dto.Episode
 import com.example.tvseriesprojectapp.dto.EpisodeSerias
 import kotlinx.android.synthetic.main.episode.view.*
 
-class RepoListAdapterSerias(private val repoList: EpisodeSerias, private val listener: OnItemClickListener) :
-    RecyclerView.Adapter<RepoListAdapterSerias.ViewHolder>() {
+class RepoListAdapterSeries(private val repoList: EpisodeSerias, private val listener: OnItemClickListener) :
+    RecyclerView.Adapter<RepoListAdapterSeries.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.episode, parent, false)

@@ -17,4 +17,9 @@
     <string name="episode_description">episode description</string>
     <string name="addshow">add show</string>
     <string name="logout">logout</string>
+    <string name="mediumRating">Рейтинг:</string>
+    <string name="descriptionShow">Описание:</string>
+    <string name="addWatch">I watch it</string>
+    <string name="comments">Comments</string>
+    <string name="episodesText">Эпизоды:</string>
 </resources>

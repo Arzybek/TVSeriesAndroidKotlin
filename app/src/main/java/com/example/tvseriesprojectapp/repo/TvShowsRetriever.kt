@@ -17,7 +17,7 @@ import java.util.*
 
 class TvShowsRetriever {
     private val service: TvSeriesService
-    private val perPage = 4;
+    private val perPage = 1;
 
     private class SessionCookieJar : CookieJar {
         private var cookies: List<okhttp3.Cookie>? = null
@@ -55,7 +55,7 @@ class TvShowsRetriever {
         service = retrofit.create(TvSeriesService::class.java)
     }
 
-    suspend fun getRepositories(): List<TvShow>  {
+    suspend fun getRepositories(): List<List<TvShow>>  {
         return service.searchRepositories(perPage)
     }
 

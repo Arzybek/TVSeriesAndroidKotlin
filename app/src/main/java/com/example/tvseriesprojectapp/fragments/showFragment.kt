@@ -20,7 +20,7 @@ import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
 import com.example.tvseriesprojectapp.dto.EpisodeSerias
 import com.example.tvseriesprojectapp.dto.TvShow
-import com.example.tvseriesprojectapp.repo.RepoListAdapterSerias
+import com.example.tvseriesprojectapp.repo.RepoListAdapterSeries
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
 import kotlinx.coroutines.CoroutineScope
@@ -68,17 +68,16 @@ class showFragment : Fragment(), View.OnClickListener {
             drawShow(mContainer, resultShow)
         }
 
-
         return mContainer
     }
 
     private fun drawShow(mContainer: View, show: TvShow): View {
         val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
         linearLayout.findViewById<TextView>(R.id.show_name).setText(show.name)
-        linearLayout.findViewById<TextView>(R.id.show_category).setText(show.category)
-        linearLayout.findViewById<TextView>(R.id.show_year).setText(show.year.toString())
+        linearLayout.findViewById<TextView>(R.id.show_category).setText("Жанр: "+show.category)
+        linearLayout.findViewById<TextView>(R.id.show_year).setText("Год: "+show.year.toString())
         //ToDO set description
-        linearLayout.findViewById<TextView>(R.id.editTextTextMultiLine).setText("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        linearLayout.findViewById<TextView>(R.id.showDescriptionText).setText(show.description)
         val url = url + "tvshows/image/" + show.imgLink
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
                 .execute(url)
@@ -97,9 +96,6 @@ class showFragment : Fragment(), View.OnClickListener {
                 show.id
             )
         })
-
-
-
 
         var cont = this.context
 
@@ -143,7 +139,7 @@ class showFragment : Fragment(), View.OnClickListener {
                 episodeView.refreshDrawableState()
                 val e = show.episodes.zip(watchedEpisodes).forEach{ pair -> pair.first.isWatched = pair.second }
                 episodeView.layoutManager = GridLayoutManager(linearLayout.context, 5)
-                episodeView.adapter = RepoListAdapterSerias(
+                episodeView.adapter = RepoListAdapterSeries(
                     EpisodeSerias(show.episodes), ClickListener(
                         episodeView
                     )
@@ -155,10 +151,10 @@ class showFragment : Fragment(), View.OnClickListener {
         }
 
 
-    inner class ClickListener(val rv: RecyclerView): RepoListAdapterSerias.OnItemClickListener{
+    inner class ClickListener(val rv: RecyclerView): RepoListAdapterSeries.OnItemClickListener{
         override fun onItemClick(position: Int) {
             if (currentShow == null) return
-            context?.toast("press episode - " + position)
+            context?.toast("pressed episode - " + position)
             val episode: Episode = currentShow!!.episodes[position]
 
             if (episode.isWatched)
@@ -224,9 +220,7 @@ class showFragment : Fragment(), View.OnClickListener {
     )
     {
         val cookie = (activity as MainActivity).getAuthCookie()
-
         val mainActivityJob = Job()
-
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch {
             Log.d("coroutine", "coroutine onRatingChangeAsync launch")
