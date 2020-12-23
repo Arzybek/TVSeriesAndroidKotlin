@@ -54,16 +54,16 @@ class MainActivity : AppCompatActivity() {
 
 
     fun makeCurrentFragment(fragment: Fragment) = supportFragmentManager.beginTransaction().apply {
-        replace(R.id.fl_wrapper, fragment)
+        replace(R.id.fl_wrapper, fragment).addToBackStack("tag")
         commit()
     }
 
     fun makeCurrentFragment(fragmentTag: String) = supportFragmentManager.beginTransaction().apply {
         when (fragmentTag){
-            "loginFragment"-> replace(R.id.fl_wrapper, loginFrag)
-            "profileFragment"-> replace(R.id.fl_wrapper, profileFrag)
-            "allFragment"-> replace(R.id.fl_wrapper, allFragment)
-            "addshowFragment" -> replace(R.id.fl_wrapper, addshowFragment)
+            "loginFragment"-> replace(R.id.fl_wrapper, loginFrag).addToBackStack("tag")
+            "profileFragment"-> replace(R.id.fl_wrapper, profileFrag).addToBackStack("tag")
+            "allFragment"-> replace(R.id.fl_wrapper, allFragment).addToBackStack("tag")
+            "addshowFragment" -> replace(R.id.fl_wrapper, addshowFragment).addToBackStack("tag")
         }
         //replace(R.id.fl_wrapper, fragment)
         commit()
