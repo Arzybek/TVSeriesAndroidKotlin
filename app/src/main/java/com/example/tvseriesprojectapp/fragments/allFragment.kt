@@ -1,14 +1,19 @@
 package com.example.tvseriesprojectapp.fragments
 
 import android.R
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.*
 import com.example.tvseriesprojectapp.*
 import com.example.tvseriesprojectapp.dto.RepoResult
 import com.example.tvseriesprojectapp.dto.TvShow
@@ -21,8 +26,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
+fun Fragment.hideKeyboard() {
+    view?.let { activity?.hideKeyboard(it) }
+}
+
+fun Activity.hideKeyboard() {
+    hideKeyboard(currentFocus ?: View(this))
+}
+
+fun Context.hideKeyboard(view: View) {
+    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
 class allFragment : Fragment(), View.OnClickListener {
-    public var result: List<TvShow> = listOf()
+    public var result: List<List<TvShow>> = listOf()
 
     inner class ClickListener(val cookie: String): RepoListAdapter.OnItemClickListener{
         override fun onItemClick(position: Int) {
@@ -32,21 +50,38 @@ class allFragment : Fragment(), View.OnClickListener {
             if (transaction != null) {
                 val fragment = showFragment()
                 fragment.arguments = bundle
-                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
-                transaction.disallowAddToBackStack()
+                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment).addToBackStack("tag")
                 transaction.commit()
             }
         }
     }
 
-    var cookie = "";
-    var clickHandler = ClickListener(cookie)
+    //var cookie = "";
+    var clickHandler = ClickListener("")
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        this.cookie = (activity as MainActivity).getJWT()
-        clickHandler = ClickListener(cookie)
-        return inflater.inflate(com.example.tvseriesprojectapp.R.layout.fragment_all, container, false)
+        var cookie = (activity as MainActivity).getAuthCookie()
+        clickHandler = ClickListener(cookie)  // возможно стоит сделать чтобы clicklistener сам дергал куку
+        val mContainer = inflater.inflate(com.example.tvseriesprojectapp.R.layout.fragment_all, container, false)
+        var editText = mContainer.findViewById<EditText>(com.example.tvseriesprojectapp.R.id.search_input)
+        editText.setOnKeyListener( object : View.OnKeyListener {
+            override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
+                // if the event is a key down event on the enter button
+                if (event.action == KeyEvent.ACTION_DOWN &&
+                    keyCode == KeyEvent.KEYCODE_ENTER
+                ) {
+                    doSearch(editText.text.toString())
+                    hideKeyboard()
+                    editText.clearFocus()
+                    editText.isCursorVisible = false
+                    return true
+                }
+                return false
+            }
+        }
+        )
+        return mContainer
     }
 
     private var mContext: Context? = null
@@ -56,13 +91,13 @@ class allFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onResume(){
+        super.onResume()
         root.layoutManager = LinearLayoutManager(mContext)
 //        this.cookie = (activity as MainActivity).getJWT()
         retrieveRepositories()
-        refreshButton.setOnClickListener {
-            retrieveRepositories()
-        }
-        super.onResume()
+//        refreshButton.setOnClickListener {
+//            retrieveRepositories()
+//        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +116,23 @@ class allFragment : Fragment(), View.OnClickListener {
 //        refreshButton.setOnClickListener {
 //            retrieveRepositories()
 //        }
+    }
+
+    fun refreshPage(i: Int) {
+        root.layoutManager = LinearLayoutManager(mContext)
+        val mainActivityJob = Job()
+        val errorHandler = CoroutineExceptionHandler { _, exception ->
+            mContext?.let {
+                AlertDialog.Builder(it).setTitle("Error")
+                    .setMessage(exception.message)
+                    .setPositiveButton(R.string.ok) { _, _ -> }
+                    .setIcon(R.drawable.ic_dialog_alert).show()
+            }
+        }
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch(errorHandler) {
+            root.adapter = RepoListAdapter(RepoResult(result[i]), clickHandler)
+        }
     }
 
     fun retrieveRepositories() {
@@ -104,8 +156,44 @@ class allFragment : Fragment(), View.OnClickListener {
             //4
             val resultList = TvShowsRetriever().getRepositories()
             result = resultList
-            val result = RepoResult(resultList)
+            val result = RepoResult(resultList[0])
             root.adapter = RepoListAdapter(result, clickHandler)
+            addPageButtons()
+        }
+    }
+
+    fun addPageButtons(){
+            buttons.removeAllViews()
+        for(j in 1..result.size){
+            var button = Button(mContext)
+            button.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            button.text = (j).toString()
+            button.setOnClickListener { refreshPage(j-1) }
+            buttons.addView(button);
+        }
+    }
+
+    fun doSearch(text: String) {
+        root.layoutManager = LinearLayoutManager(mContext)
+        val mainActivityJob = Job()
+        val errorHandler = CoroutineExceptionHandler { _, exception ->
+            mContext?.let {
+                AlertDialog.Builder(it).setTitle("Error")
+                    .setMessage(exception.message)
+                    .setPositiveButton(R.string.ok) { _, _ -> }
+                    .setIcon(R.drawable.ic_dialog_alert).show()
+            }
+        }
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch(errorHandler) {
+            var resultList = mutableListOf<List<TvShow>>();
+            if(text.isBlank())
+             resultList = TvShowsRetriever().getRepositories() as MutableList<List<TvShow>>
+            else resultList = TvShowsRetriever().searchRepositoriesByName(text) as MutableList<List<TvShow>>
+            result = resultList
+            val result = RepoResult(resultList[0])
+            root.adapter = RepoListAdapter(result, clickHandler)
+            addPageButtons()
         }
     }
 

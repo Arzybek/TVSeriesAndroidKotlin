@@ -11,23 +11,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.RepoResult
 import com.example.tvseriesprojectapp.dto.TvShow
+import com.example.tvseriesprojectapp.dto.User
+import com.example.tvseriesprojectapp.repo.ProfileAdapter
 import com.example.tvseriesprojectapp.repo.RepoListAdapter
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
 import com.squareup.picasso.Picasso
-import io.ktor.client.HttpClient
-import io.ktor.client.features.cookies.AcceptAllCookiesStorage
-import io.ktor.client.features.cookies.HttpCookies
-import io.ktor.client.features.cookies.addCookie
-import io.ktor.client.request.get
-import io.ktor.http.Cookie
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.coroutines.*
 import java.lang.Exception
@@ -36,11 +29,7 @@ import java.lang.Exception
 class profileFragment : Fragment(), View.OnClickListener {
     public var result: List<TvShow> = listOf()
 
-    private var ip = Session.ip
-    private var port = Session.port
-    private var url = "http://${ip}:${port}/profile"
-    private var cookie = ""
-    var clickHandler = ClickListener(cookie)
+    var clickHandler = ClickListener()
 
     private var mContext: Context? = null
     override fun onAttach(context: Context) {
@@ -48,7 +37,7 @@ class profileFragment : Fragment(), View.OnClickListener {
         mContext = context
     }
 
-    inner class ClickListener(val cookie: String): RepoListAdapter.OnItemClickListener{
+    inner class ClickListener(): RepoListAdapter.OnItemClickListener{
         override fun onItemClick(position: Int) {
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             var bundle = Bundle()
@@ -56,16 +45,15 @@ class profileFragment : Fragment(), View.OnClickListener {
             if (transaction != null) {
                 val fragment = showFragment()
                 fragment.arguments = bundle
-                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
-                transaction.disallowAddToBackStack()
+                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment).addToBackStack("")
                 transaction.commit()
             }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        this.cookie = (activity as MainActivity).getJWT()
-        clickHandler = ClickListener(cookie)
+        //this.cookie = (activity as MainActivity).getAuthCookie()
+        clickHandler = ClickListener()
         super.onCreate(savedInstanceState)
 
     }
@@ -73,46 +61,33 @@ class profileFragment : Fragment(), View.OnClickListener {
     override fun onResume(){
         super.onResume()
 
-        var aa = activity.toString()
-        Log.i("prof", aa)
-        var jwt = (activity as MainActivity?)?.getJWT()!!
-        val client = HttpClient(){
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-                GlobalScope.launch(Dispatchers.IO) {
-                    storage.addCookie(url, Cookie("auth", jwt))
+        var cookie = (activity as MainActivity).getAuthCookie()
+
+        val mainActivityJob = Job()
+
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine onResumeProfile launch")
+            var user = ProfileAdapter().getProfile(cookie)
+            if (user==null || user.name==null || user.name=="")
+                drawNoUser()
+            else
+            {
+                Log.i("profile", user.name)
+                drawUser(user)
+                if(cookie!="") {
+                    retrieveShows()
+                    refreshButtonProfile.setOnClickListener {
+                        retrieveShows()
+                    }
                 }
-            }
-        }
-
-        var data = ""
-
-        runBlocking(Dispatchers.IO) {
-            data = client.get<String>(url)
-            Log.i("aaa", data)
-        }
-
-        Log.i("profile", data)
-        Log.i("JWT", jwt)
-
-        if (data.equals(""))
-            drawNoUser()
-        else
-            drawUser(data)
-
-        if(cookie!="") {
-            retrieveShows()
-            refreshButtonProfile.setOnClickListener {
-                retrieveShows()
             }
         }
     }
 
     fun retrieveShows() {
-        //1 Create a Coroutine scope using a job to be able to cancel when needed
         recyclerProfile.layoutManager = LinearLayoutManager(mContext)
         val mainActivityJob = Job()
-        //2 Handle exceptions if any
         val errorHandler = CoroutineExceptionHandler { _, exception ->
             mContext?.let {
                 AlertDialog.Builder(it).setTitle("Error")
@@ -122,10 +97,9 @@ class profileFragment : Fragment(), View.OnClickListener {
             }
         }
 
-        //3 the Coroutine runs using the Main (UI) dispatcher
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch(errorHandler) {
-            //4
+            var cookie = (activity as MainActivity).getAuthCookie()
             val resultList = TvShowsRetriever().getRepositoriesUser("auth="+cookie)
             result = resultList
             val result = RepoResult(resultList)
@@ -136,29 +110,23 @@ class profileFragment : Fragment(), View.OnClickListener {
     private fun drawNoUser()
     {
         view!!.findViewById<TextView>(R.id.profileName).setText("Anonymous")
-        view!!.findViewById<TextView>(R.id.profilAge).setText("0")
+        view!!.findViewById<TextView>(R.id.profileAge).setText("0")
         view!!.findViewById<ImageView>(R.id.profilePicture).setImageResource(R.drawable.default_profile)
     }
 
 
-    private fun drawUser(userStr:String)
+    private fun drawUser(user: User)
     {
-        val parser: Parser = Parser.default()
-        val stringBuilder: StringBuilder = StringBuilder(userStr)
-        val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+        view!!.findViewById<TextView>(R.id.profileName).setText(user.name)
+        view!!.findViewById<TextView>(R.id.profileAge).setText(user.age.toString())
         try{
-            view!!.findViewById<TextView>(R.id.profileName).setText(json.string("name"))
-            view!!.findViewById<TextView>(R.id.profilAge).setText(json.int("age").toString())
-
-
-
             val imageView = view!!.findViewById<ImageView>(R.id.profilePicture)
-            Picasso.get().load(json.string("photoLink")).into(imageView)
+            Picasso.get().load(user.photoLink).into(imageView)
         }
         catch (e:Exception)
         {
+            view!!.findViewById<ImageView>(R.id.profilePicture).setImageResource(R.drawable.default_profile)
             Log.e("drawUSerException", e.toString())
-            drawNoUser()
         }
 
 
@@ -175,11 +143,22 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(view:View){
-        Log.i("Profile", "login tapped")
 
-        val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
-        toast.show()
+        if (view != null) {
+            when (view.id) {
+                R.id.logoutProfileButton -> logout()
+            }
+        }
 
+        //val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
+        //toast.show()
+
+    }
+
+
+    private fun logout()
+    {
+        (activity as MainActivity).logout()
     }
 
 

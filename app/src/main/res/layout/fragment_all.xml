@@ -1,22 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".fragments.allFragment">
+
+    <EditText
+        android:id="@+id/search_input"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".fragments.allFragment">
+        android:layout_height="wrap_content"
+        android:hint="Search..."
+        android:inputType="text"
+        android:padding="10dp" />
+
 
     <android.support.v7.widget.RecyclerView
-            android:id="@+id/root"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-    <Button
-            android:id="@+id/refreshButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/refreshButton"
-            android:layout_gravity="bottom"
-            android:onClick="onClick"
-            />
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="horizontal">
 
-</FrameLayout>
+    </LinearLayout>
+
+</LinearLayout>
