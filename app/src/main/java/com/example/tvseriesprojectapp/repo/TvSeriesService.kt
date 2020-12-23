@@ -9,6 +9,9 @@ interface TvSeriesService {
     @GET("/tvshows")
     suspend fun searchRepositories(@Query("q") perPage: Int): List<List<TvShow>>
 
+    @GET("/tvshows/search")
+    suspend fun searchRepositoriesByName(@Query("q")  query: String): List<List<TvShow>>
+
     @GET("/user/watching")
     suspend fun searchRepositoriesUser(@Header("Cookie") auth: String): List<TvShow>
 

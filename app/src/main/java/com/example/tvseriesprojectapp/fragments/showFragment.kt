@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -23,6 +24,7 @@ import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.repo.RepoListAdapterSeries
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
+import kotlinx.android.synthetic.main.fragment_show.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,6 +36,7 @@ import java.net.URL
 class showFragment : Fragment(), View.OnClickListener {
     private var url = "http://${Session.ip}:${Session.port}/"
     private var pos = -1;
+    var episodeSeries = EpisodeSerias(mutableListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("showFrag", "onCreate")
@@ -138,6 +141,7 @@ class showFragment : Fragment(), View.OnClickListener {
                 val episodeView = linearLayout.findViewById<RecyclerView>(R.id.episodeView)
                 episodeView.refreshDrawableState()
                 val e = show.episodes.zip(watchedEpisodes).forEach{ pair -> pair.first.isWatched = pair.second }
+                episodeSeries = EpisodeSerias(show.episodes)
                 episodeView.layoutManager = GridLayoutManager(linearLayout.context, 5)
                 episodeView.adapter = RepoListAdapterSeries(
                     EpisodeSerias(show.episodes), ClickListener(
@@ -151,10 +155,17 @@ class showFragment : Fragment(), View.OnClickListener {
         }
 
 
+    fun redraw(){
+        var myAdapter = episodeView.adapter
+        episodeView.setAdapter(myAdapter);
+        if (myAdapter != null) {
+            myAdapter.notifyDataSetChanged()
+        };
+    }
+
     inner class ClickListener(val rv: RecyclerView): RepoListAdapterSeries.OnItemClickListener{
         override fun onItemClick(position: Int) {
             if (currentShow == null) return
-            context?.toast("pressed episode - " + position)
             val episode: Episode = currentShow!!.episodes[position]
 
             if (episode.isWatched)
@@ -167,6 +178,7 @@ class showFragment : Fragment(), View.OnClickListener {
                 onEpisodeClickAsync(true, position)
                 episode.isWatched = true
             }
+            redraw()
         }
     }
 

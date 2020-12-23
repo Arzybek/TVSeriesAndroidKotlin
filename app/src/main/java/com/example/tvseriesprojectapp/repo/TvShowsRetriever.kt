@@ -63,6 +63,10 @@ class TvShowsRetriever {
         return service.searchRepositoriesUser(str)
     }
 
+    suspend fun searchRepositoriesByName(str: String): List<List<TvShow>>  {
+        return service.searchRepositoriesByName(str)
+    }
+
     suspend fun getShow(showID:Long) : TvShow
     {
         Log.d("retrofit", "getShow "+showID.toString())

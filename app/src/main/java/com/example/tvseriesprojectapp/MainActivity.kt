@@ -40,6 +40,11 @@ class MainActivity : AppCompatActivity() {
 //        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
+    override fun onResume() {
+        super.onResume()
+        makeCurrentFragment(allFragment)
+    }
+
     fun onClick(v: View?) {
         if (v != null) {
             when (v.id) {

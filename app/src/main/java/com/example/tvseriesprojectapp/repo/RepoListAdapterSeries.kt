@@ -30,7 +30,7 @@ class RepoListAdapterSeries(private val repoList: EpisodeSerias, private val lis
             itemView.setOnClickListener(this)
         }
         fun bindRepo(repo: Episode) {
-            itemView.seriasName.text = repo.episodeName.toString().orEmpty()
+            itemView.seriesName.text = repo.episodeName.toString().orEmpty()
             if (repo.isWatched){
                 itemView.setBackgroundColor(Color.GREEN)
                 //todo Change color
