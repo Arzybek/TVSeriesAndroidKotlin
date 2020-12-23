@@ -45,8 +45,7 @@ class profileFragment : Fragment(), View.OnClickListener {
             if (transaction != null) {
                 val fragment = showFragment()
                 fragment.arguments = bundle
-                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
-                transaction.disallowAddToBackStack()
+                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment).addToBackStack("")
                 transaction.commit()
             }
         }

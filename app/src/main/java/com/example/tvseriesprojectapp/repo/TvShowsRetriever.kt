@@ -15,7 +15,7 @@ import java.util.*
 
 class TvShowsRetriever {
     private val service: TvSeriesService
-    private val maxPerPage = 6;
+    private val maxPerPage = 2;
 
     private class SessionCookieJar : CookieJar {
         private var cookies: List<okhttp3.Cookie>? = null
