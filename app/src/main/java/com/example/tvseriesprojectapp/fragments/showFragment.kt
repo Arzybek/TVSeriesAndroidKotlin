@@ -80,7 +80,6 @@ class showFragment : Fragment(), View.OnClickListener {
         linearLayout.findViewById<TextView>(R.id.show_category).setText("Жанр: "+show.category)
         linearLayout.findViewById<TextView>(R.id.show_year).setText("Год: "+show.year.toString())
         //ToDO set description
-        linearLayout.findViewById<TextView>(R.id.showDescriptionText).setText(show.description)
         val url = url + "tvshows/image/" + show.imgLink
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
                 .execute(url)

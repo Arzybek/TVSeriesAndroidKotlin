@@ -11,34 +11,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".fragments.CommentsFragment"
     android:clickable="true"
     android:id="@+id/commentsLayout"
     android:orientation="vertical">
 
 
-    <Button
-        android:id="@+id/commentsReturnButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="onClick"
-        android:text="Return"
-        android:textSize="25sp" />
-
-    <TextView
-        android:id="@+id/showDescriptionText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:paddingStart="10dp"
-        android:gravity="start|top"
-        android:inputType="textMultiLine" />
-
-
     <EditText
         android:id="@+id/review"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Reception" />
 
@@ -48,10 +30,19 @@
         android:layout_height="wrap_content"
         android:onClick="onClick"
         android:text="Send Review"
-        android:textSize="25sp" />
+        android:textSize="20sp"
+        android:layout_gravity="center"
+        />
 
+    <LinearLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".fragments.CommentsFragment"
+        android:id="@+id/reviews"
+        android:orientation="vertical">
 
-
+    </LinearLayout>
 
 </LinearLayout>
 

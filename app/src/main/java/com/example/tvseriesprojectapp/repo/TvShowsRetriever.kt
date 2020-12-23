@@ -4,10 +4,8 @@ import android.util.Log
 import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.user.Session
 import com.google.gson.GsonBuilder
-import io.ktor.http.*
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -17,7 +15,7 @@ import java.util.*
 
 class TvShowsRetriever {
     private val service: TvSeriesService
-    private val perPage = 1;
+    private val maxPerPage = 5;
 
     private class SessionCookieJar : CookieJar {
         private var cookies: List<okhttp3.Cookie>? = null
@@ -56,7 +54,7 @@ class TvShowsRetriever {
     }
 
     suspend fun getRepositories(): List<List<TvShow>>  {
-        return service.searchRepositories(perPage)
+        return service.searchRepositories(maxPerPage)
     }
 
     suspend fun getRepositoriesUser(str: String): List<TvShow>  {

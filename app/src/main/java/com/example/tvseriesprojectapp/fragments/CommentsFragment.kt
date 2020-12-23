@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +23,9 @@ import kotlinx.coroutines.launch
 
 class CommentsFragment : Fragment() {
     // TODO: Rename and change types of parameters
-    private var showID:Long = -1;
+    private var showID: Long = -1;
+    private var mContext: Context? = null
+    private var linearLayout: LinearLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,36 +38,26 @@ class CommentsFragment : Fragment() {
         arguments?.getLong("showID")?.let {
             showID = it
         }
+        mContext = context;
     }
 
 
-    fun onClick()
-    {
+    fun onClick() {
 
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         val mContainer = inflater.inflate(R.layout.fragment_comments, null)
 
-        val linearLayout = mContainer?.findViewById<LinearLayout>(R.id.commentsLayout)
+        var linearLayout = mContainer?.findViewById<LinearLayout>(R.id.commentsLayout)
 
         var cont = this.context
 
-        var params = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        (linearLayout?.findViewById(R.id.commentsReturnButton) as Button).setOnClickListener({
-            onReturnClick(
-                showID
-            )
-        })
-
-
-        (linearLayout.findViewById(R.id.addReviewButton) as Button).setOnClickListener({
+        (linearLayout?.findViewById(R.id.addReviewButton) as Button).setOnClickListener({
             onSendReviewClickAsync(
                 showID
             )
@@ -72,58 +65,45 @@ class CommentsFragment : Fragment() {
 
         val mainActivityJob = Job()
 
+        linearLayout = mContainer?.findViewById<LinearLayout>(R.id.reviews)
+        this.linearLayout = linearLayout
+
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch {
-            var reviews = TvShowsRetriever().getRandomReviews(5, showID)
-
-            for (i in 0..reviews.size-1) {
-                val dynamicText = TextView(cont)
-                dynamicText.setText(reviews.get(i))
-                linearLayout?.addView(dynamicText, params);
-            }
-
-            var cookie = (activity as MainActivity).getAuthCookie()
-
-            var review = TvShowsRetriever().getReview(showID, cookie)
-
-            (linearLayout.findViewById(R.id.review) as EditText).setText(
-                review,
-                TextView.BufferType.EDITABLE
-            )
+            redraw(linearLayout)
         }
 
-
-        // Inflate the layout for this fragment
         return mContainer;
     }
 
-
-    private fun onReturnClick(showID:Long)
-    {
-        val transaction = activity?.supportFragmentManager?.beginTransaction()
-        var bundle = Bundle()
-        bundle.putInt("id", showID.toInt())
-        if (transaction != null) {
-            val fragment = showFragment()
-            fragment.arguments = bundle
-            transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
-            transaction.disallowAddToBackStack()
-            transaction.commit()
+    suspend fun redraw(linearLayout: LinearLayout?){
+        var reviews = TvShowsRetriever().getRandomReviews(5, showID)
+        var params = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        val dp = TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 10F,
+            mContext?.getResources()?.getDisplayMetrics()
+        ).toInt();
+        params.setMargins(dp, dp, dp, dp)
+        linearLayout?.removeAllViews()
+        for (i in 0..reviews.size - 1) {
+            val dynamicText = TextView(mContext)
+            dynamicText.setText(reviews.get(i))
+            dynamicText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15F)
+            linearLayout?.addView(dynamicText, params);
         }
     }
 
-
-    private fun onSendReviewClickAsync(showID: Long)
-    {
+    private fun onSendReviewClickAsync(showID: Long) {
         val cookie = (activity as MainActivity).getAuthCookie()
-
         val mainActivityJob = Job()
-
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch {
             Log.d("coroutine", "coroutine onSendReviewClickAsync launch")
-            val review =view!!.findViewById<EditText>(R.id.review).text.toString()
+            val review = view!!.findViewById<EditText>(R.id.review).text.toString()
             TvShowsRetriever().sendReview(review, showID, cookie)
+            redraw(linearLayout)
         }
     }
 
