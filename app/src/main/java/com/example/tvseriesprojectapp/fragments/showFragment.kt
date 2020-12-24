@@ -21,6 +21,7 @@ import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
 import com.example.tvseriesprojectapp.dto.EpisodeSerias
 import com.example.tvseriesprojectapp.dto.TvShow
+import com.example.tvseriesprojectapp.repo.ProfileAdapter
 import com.example.tvseriesprojectapp.repo.RepoListAdapterSeries
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
@@ -93,6 +94,7 @@ class showFragment : Fragment(), View.OnClickListener {
 
            }
 
+
         (linearLayout.findViewById(R.id.commentsButton) as Button).setOnClickListener({
             onCommentsClick(
                 show.id
@@ -113,6 +115,7 @@ class showFragment : Fragment(), View.OnClickListener {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
+                mRatingBar.rating = TvShowsRetriever().getUserRating(show.id, cookie);
                 var ratingText = (linearLayout.findViewById(R.id.show_rating) as TextView)
                 var rating = TvShowsRetriever().getShowRating(show.id)
                 var rounded = Math.round(rating * 100).toDouble()/100

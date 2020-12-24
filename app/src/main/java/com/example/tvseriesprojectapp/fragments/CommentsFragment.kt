@@ -77,6 +77,8 @@ class CommentsFragment : Fragment() {
     }
 
     suspend fun redraw(linearLayout: LinearLayout?){
+        var cookie = (activity as MainActivity).getAuthCookie()
+        view!!.findViewById<EditText>(R.id.review).setText(TvShowsRetriever().getReview(showID, cookie));
         var reviews = TvShowsRetriever().getRandomReviews(5, showID)
         var params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
