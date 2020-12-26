@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -61,6 +62,10 @@ class profileFragment : Fragment(), View.OnClickListener {
     override fun onResume(){
         super.onResume()
 
+        var viewExtracted = view
+        var recProfile = recyclerProfile
+        var refreshButtpn = refreshButtonProfile  // это нужно чтобы прилажуха при повороте не падала (проблема в асинхронщине мне кажется)
+
         var cookie = (activity as MainActivity).getAuthCookie()
 
         val mainActivityJob = Job()
@@ -74,19 +79,19 @@ class profileFragment : Fragment(), View.OnClickListener {
             else
             {
                 Log.i("profile", user.name)
-                drawUser(user)
+                drawUser(user, viewExtracted)
                 if(cookie!="") {
-                    retrieveShows()
-                    refreshButtonProfile.setOnClickListener {
-                        retrieveShows()
+                    retrieveShows(recProfile)
+                    refreshButtpn.setOnClickListener {
+                        retrieveShows(recProfile)
                     }
                 }
             }
         }
     }
 
-    fun retrieveShows() {
-        recyclerProfile.layoutManager = LinearLayoutManager(mContext)
+    fun retrieveShows(recProfile: RecyclerView?) {
+        recProfile!!.layoutManager = LinearLayoutManager(mContext)
         val mainActivityJob = Job()
         val errorHandler = CoroutineExceptionHandler { _, exception ->
             mContext?.let {
@@ -115,12 +120,12 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun drawUser(user: User)
+    private fun drawUser(user: User, viewExtracted:View?)
     {
-        view!!.findViewById<TextView>(R.id.profileName).setText(user.name)
-        view!!.findViewById<TextView>(R.id.profileAge).setText(user.age.toString())
+        viewExtracted!!.findViewById<TextView>(R.id.profileName).setText(user.name)
+        viewExtracted!!.findViewById<TextView>(R.id.profileAge).setText(user.age.toString())
         try{
-            val imageView = view!!.findViewById<ImageView>(R.id.profilePicture)
+            val imageView = viewExtracted!!.findViewById<ImageView>(R.id.profilePicture)
             Picasso.get().load(user.photoLink).into(imageView)
         }
         catch (e:Exception)
@@ -150,8 +155,6 @@ class profileFragment : Fragment(), View.OnClickListener {
             }
         }
 
-        //val toast: Toast = Toast.makeText(view!!.context, "Login failed.", Toast.LENGTH_LONG);
-        //toast.show()
 
     }
 

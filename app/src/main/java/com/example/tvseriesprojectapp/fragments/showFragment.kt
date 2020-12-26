@@ -90,20 +90,19 @@ class showFragment : Fragment(), View.OnClickListener {
 
        mRatingBar.onRatingBarChangeListener =
            RatingBar.OnRatingBarChangeListener { ratingBar, rating, fromUser ->
-               onRatingChangeAsync(ratingBar, rating, fromUser, show.id)
+               onRatingChangeAsync(rating, show.id)
 
            }
 
 
-        (linearLayout.findViewById(R.id.commentsButton) as Button).setOnClickListener({
+        (linearLayout.findViewById(R.id.commentsButton) as Button).setOnClickListener {
             onCommentsClick(
-                show.id
+                    show.id
             )
-        })
+        }
 
-        var cont = this.context
 
-            val mainActivityJob = Job()
+        val mainActivityJob = Job()
 
             val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
             coroutineScope.launch {
@@ -120,11 +119,6 @@ class showFragment : Fragment(), View.OnClickListener {
                 var rating = TvShowsRetriever().getShowRating(show.id)
                 var rounded = Math.round(rating * 100).toDouble()/100
                 ratingText.setText(rounded.toString())
-
-                //mRatingBar.rating = TvShowsRetriever().getUserRating(show.id, cookie)
-
-//            addToWatchingButton.x = 20.0F;
-//            addToWatchingButton.y = 0F;
                 addToWatchingButton.setTag(R.id.resourceShowID, show.id)
                 if (isWatching) {
                     addToWatchingButton.isActivated = true
@@ -227,9 +221,7 @@ class showFragment : Fragment(), View.OnClickListener {
 
 
     private fun onRatingChangeAsync(
-        ratingBar: RatingBar,
         rating: Float,
-        fromUser: Boolean,
         showID: Long
     )
     {

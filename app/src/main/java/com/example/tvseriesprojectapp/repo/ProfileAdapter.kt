@@ -18,7 +18,6 @@ class ProfileAdapter {
     }
 
     init {
-        // 2
         val gson = GsonBuilder()
                 .setLenient()
                 .create()
@@ -26,7 +25,6 @@ class ProfileAdapter {
         val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-//            .client(OkHttpClient().newBuilder().cookieJar(SessionCookieJar()).build())
                 .build()
 
         service = retrofit.create(ProfileService::class.java)

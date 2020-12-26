@@ -10,9 +10,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.File
 
-//import org.jetbrains.anko.doAsync
-//import org.jetbrains.anko.uiThread
-
 class MainActivity : AppCompatActivity() {
     val loginFrag = loginFragment()
     var profileFrag = profileFragment()
@@ -70,7 +67,6 @@ class MainActivity : AppCompatActivity() {
             "allFragment"-> replace(R.id.fl_wrapper, allFragment).addToBackStack("tag")
             "addshowFragment" -> replace(R.id.fl_wrapper, addshowFragment).addToBackStack("tag")
         }
-        //replace(R.id.fl_wrapper, fragment)
         commit()
     }
 
@@ -111,40 +107,4 @@ class MainActivity : AppCompatActivity() {
     {
         return this.jwtCookie
     }
-
-//    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-//        when (item.itemId) {
-//            R.id.action_map -> {
-//                openFragment(profileFrag)
-//                return@OnNavigationItemSelectedListener true
-//            }
-//            R.id.action_login -> {
-//                openFragment(loginFrag)
-//                return@OnNavigationItemSelectedListener true
-//            }
-//            R.id.action_all -> {
-//                openFragment(allFragment)
-//                return@OnNavigationItemSelectedListener true
-//            }
-//        }
-//        false
-//    }
-//
-//
-//    private fun openFragment(fragment: Fragment) {
-//        val transaction = supportFragmentManager.beginTransaction()
-//        transaction.replace(R.id.container, fragment)
-//        transaction.addToBackStack(null)
-//        transaction.commit()
-//    }
-
-    /*fun setJWT(jwt:String)
-    {
-        this.jwtCookie = jwt;
-    }
-
-    fun getJWT():String
-    {
-        return this.jwtCookie;
-    }*/
 }
