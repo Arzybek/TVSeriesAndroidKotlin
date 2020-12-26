@@ -7,13 +7,11 @@ import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.security.PublicKey
 
 
 class ProfileAdapter {
 
     private val service: ProfileService
-
 
     companion object {
         const val BASE_URL = "http://${Session.ip}:${Session.port}/"
@@ -21,42 +19,38 @@ class ProfileAdapter {
 
     init {
         val gson = GsonBuilder()
-                .setLenient()
-                .create()
+            .setLenient()
+            .create()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
 
         service = retrofit.create(ProfileService::class.java)
     }
 
-    suspend public fun getProfile(cookie:String) : User
-    {
-        Log.d("retrofit", "getProfile "+cookie)
-        var cookieToSend = "auth="+cookie
+    suspend public fun getProfile(cookie: String): User {
+        Log.d("retrofit", "getProfile " + cookie)
+        var cookieToSend = "auth=" + cookie
         return service.getProfile(cookieToSend)
     }
 
-    suspend public fun insecureRegister(logPass:String) : String
-    {
-        Log.d("retrofit", "insecureRegister  "+logPass)
-        var cookieToSend = "register="+logPass
+    suspend public fun insecureRegister(logPass: String): String {
+        Log.d("retrofit", "insecureRegister  " + logPass)
+        var cookieToSend = "register=" + logPass
         return service.insecureRegister(cookieToSend)
     }
 
-    suspend fun getRSAkey() : String
-    {
+    suspend fun getRSAkey(): String {
         Log.d("retrofit", "getRSAkey")
         return service.getRSAkey()
     }
 
-    suspend fun secureRegister(logpassEncrypted:String) : String
-    {
+    suspend fun secureRegister(logpassEncrypted: String): String {
         Log.d("retrofit", "secureRegister")
-        var cookieToSend = "register="+logpassEncrypted
+        var cookieToSend = "register=" + logpassEncrypted
         return service.secureRegister(cookieToSend)
     }
 

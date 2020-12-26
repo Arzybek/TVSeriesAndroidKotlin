@@ -1,6 +1,5 @@
 package com.example.tvseriesprojectapp.fragments
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -8,32 +7,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.Toast
 import com.beust.klaxon.Klaxon
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
-import com.example.tvseriesprojectapp.user.Session
-import io.ktor.client.HttpClient
-import io.ktor.client.features.cookies.AcceptAllCookiesStorage
-import io.ktor.client.features.cookies.HttpCookies
-import io.ktor.client.features.cookies.addCookie
-import io.ktor.client.features.cookies.cookies
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.http.Cookie
-import kotlinx.android.synthetic.main.fragment_addshow.*
 import kotlinx.coroutines.*
 
 class addshowFragment : Fragment() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_addshow, container, false)
     }
 
@@ -47,7 +36,7 @@ class addshowFragment : Fragment() {
         }
     }
 
-    private fun addShowButtonPressedAsync(){
+    private fun addShowButtonPressedAsync() {
         val showName: EditText = view!!.findViewById<EditText>(R.id.showName)
         val epCount: EditText = view!!.findViewById<EditText>(R.id.episodesCount)
 

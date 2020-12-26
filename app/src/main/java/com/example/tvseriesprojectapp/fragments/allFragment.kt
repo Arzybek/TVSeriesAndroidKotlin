@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +18,6 @@ import com.example.tvseriesprojectapp.dto.RepoResult
 import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.repo.RepoListAdapter
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
-import com.example.tvseriesprojectapp.user.Session
 import kotlinx.android.synthetic.main.fragment_all.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +40,7 @@ fun Context.hideKeyboard(view: View) {
 class allFragment : Fragment(), View.OnClickListener {
     public var result: List<List<TvShow>> = listOf()
 
-    inner class ClickListener(val cookie: String): RepoListAdapter.OnItemClickListener{
+    inner class ClickListener(val cookie: String) : RepoListAdapter.OnItemClickListener {
         override fun onItemClick(position: Int) {
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             var bundle = Bundle()
@@ -50,7 +48,8 @@ class allFragment : Fragment(), View.OnClickListener {
             if (transaction != null) {
                 val fragment = showFragment()
                 fragment.arguments = bundle
-                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment).addToBackStack("tag")
+                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
+                    .addToBackStack("tag")
                 transaction.commit()
             }
         }
@@ -59,13 +58,18 @@ class allFragment : Fragment(), View.OnClickListener {
     //var cookie = "";
     var clickHandler = ClickListener("")
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         var cookie = (activity as MainActivity).getAuthCookie()
-        clickHandler = ClickListener(cookie)  // возможно стоит сделать чтобы clicklistener сам дергал куку
-        val mContainer = inflater.inflate(com.example.tvseriesprojectapp.R.layout.fragment_all, container, false)
-        var editText = mContainer.findViewById<EditText>(com.example.tvseriesprojectapp.R.id.search_input)
-        editText.setOnKeyListener( object : View.OnKeyListener {
+        clickHandler =
+            ClickListener(cookie)  // возможно стоит сделать чтобы clicklistener сам дергал куку
+        val mContainer =
+            inflater.inflate(com.example.tvseriesprojectapp.R.layout.fragment_all, container, false)
+        var editText =
+            mContainer.findViewById<EditText>(com.example.tvseriesprojectapp.R.id.search_input)
+        editText.setOnKeyListener(object : View.OnKeyListener {
             override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
                 // if the event is a key down event on the enter button
                 if (event.action == KeyEvent.ACTION_DOWN &&
@@ -90,32 +94,14 @@ class allFragment : Fragment(), View.OnClickListener {
         mContext = context
     }
 
-    override fun onResume(){
+    override fun onResume() {
         super.onResume()
         root.layoutManager = LinearLayoutManager(mContext)
-//        this.cookie = (activity as MainActivity).getJWT()
         retrieveRepositories()
-//        refreshButton.setOnClickListener {
-//            retrieveRepositories()
-//        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        if (isNetworkConnected()) {
-//            retrieveRepositories()
-//        } else {
-//            mContext?.let {
-//                AlertDialog.Builder(it).setTitle("No Internet Connection")
-//                    .setMessage("Please check your internet connection and try again")
-//                    .setPositiveButton(android.R.string.ok) { _, _ -> }
-//                    .setIcon(android.R.drawable.ic_dialog_alert).show()
-//            }
-//        }
-//        retrieveRepositories()
-//        refreshButton.setOnClickListener {
-//            retrieveRepositories()
-//        }
     }
 
     fun refreshPage(i: Int) {
@@ -153,7 +139,6 @@ class allFragment : Fragment(), View.OnClickListener {
         //3 the Coroutine runs using the Main (UI) dispatcher
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch(errorHandler) {
-            //4
             val resultList = TvShowsRetriever().getRepositories()
             result = resultList
             val result = RepoResult(resultList[0])
@@ -162,13 +147,16 @@ class allFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    fun addPageButtons(){
-            buttons.removeAllViews()
-        for(j in 1..result.size){
+    fun addPageButtons() {
+        buttons.removeAllViews()
+        for (j in 1..result.size) {
             var button = Button(mContext)
-            button.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            button.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
             button.text = (j).toString()
-            button.setOnClickListener { refreshPage(j-1) }
+            button.setOnClickListener { refreshPage(j - 1) }
             buttons.addView(button);
         }
     }
@@ -186,10 +174,11 @@ class allFragment : Fragment(), View.OnClickListener {
         }
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch(errorHandler) {
-            var resultList = mutableListOf<List<TvShow>>();
-            if(text.isBlank())
-             resultList = TvShowsRetriever().getRepositories() as MutableList<List<TvShow>>
-            else resultList = TvShowsRetriever().searchRepositoriesByName(text) as MutableList<List<TvShow>>
+            var resultList: MutableList<List<TvShow>>;
+            if (text.isBlank())
+                resultList = TvShowsRetriever().getRepositories() as MutableList<List<TvShow>>
+            else resultList =
+                TvShowsRetriever().searchRepositoriesByName(text) as MutableList<List<TvShow>>
             result = resultList
             val result = RepoResult(resultList[0])
             root.adapter = RepoListAdapter(result, clickHandler)
@@ -198,22 +187,5 @@ class allFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
-//        if (v != null) {
-//            when (v.id) {
-//                com.example.tvseriesprojectapp.R.id.refreshButton -> retrieveRepositories()
-//            }
-//        }
     }
-
-//    private fun isNetworkConnected(): Boolean {
-//        val connectivityManager = getSystemService(mContext.CONNEC) as ConnectivityManager
-//        val activeNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            connectivityManager.activeNetwork
-//        } else {
-//            TODO("VERSION.SDK_INT < M")
-//        }
-//        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
-//        return networkCapabilities != null &&
-//                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-//    }
 }

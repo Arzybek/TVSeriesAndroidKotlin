@@ -31,7 +31,6 @@ class CommentsFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 
-
     override fun onAttach(context: Context?) {
         Log.d("CommentsFragment", "onAttach")
         super.onAttach(context)
@@ -43,25 +42,21 @@ class CommentsFragment : Fragment() {
 
 
     fun onClick() {
-
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         val mContainer = inflater.inflate(R.layout.fragment_comments, null)
 
         var linearLayout = mContainer?.findViewById<LinearLayout>(R.id.commentsLayout)
 
-        var cont = this.context
-
-        (linearLayout?.findViewById(R.id.addReviewButton) as Button).setOnClickListener({
+        (linearLayout?.findViewById(R.id.addReviewButton) as Button).setOnClickListener {
             onSendReviewClickAsync(
                 showID
             )
-        })
+        }
 
         val mainActivityJob = Job()
 
@@ -76,25 +71,27 @@ class CommentsFragment : Fragment() {
         return mContainer;
     }
 
-    suspend fun redraw(linearLayout: LinearLayout?){
+    suspend fun redraw(linearLayout: LinearLayout?) {
         var cookie = (activity as MainActivity).getAuthCookie()
         var review = TvShowsRetriever().getReview(showID, cookie)
-        if(review=="no review")
+        if (review == "no review")
             review = ""
-        else view!!.findViewById<EditText>(R.id.review).setText(TvShowsRetriever().getReview(showID, cookie));
+        else view!!.findViewById<EditText>(R.id.review)
+            .setText(TvShowsRetriever().getReview(showID, cookie));
         var reviews = TvShowsRetriever().getRandomReviews(5, showID)
         var params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        val dp = TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 10F,
+        val dp = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 10F,
             mContext?.getResources()?.getDisplayMetrics()
         ).toInt();
         params.setMargins(dp, dp, dp, dp)
         linearLayout?.removeAllViews()
-        for (i in 0..reviews.size - 1) {
+        for (i in 0 until reviews.size) {
             val dynamicText = TextView(mContext)
-            dynamicText.setText(reviews.get(i))
+            dynamicText.text = reviews[i]
             dynamicText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15F)
             linearLayout?.addView(dynamicText, params);
         }

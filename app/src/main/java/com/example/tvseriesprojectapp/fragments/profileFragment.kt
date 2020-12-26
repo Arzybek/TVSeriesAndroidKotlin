@@ -20,7 +20,6 @@ import com.example.tvseriesprojectapp.dto.User
 import com.example.tvseriesprojectapp.repo.ProfileAdapter
 import com.example.tvseriesprojectapp.repo.RepoListAdapter
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
-import com.example.tvseriesprojectapp.user.Session
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.coroutines.*
@@ -28,7 +27,7 @@ import java.lang.Exception
 
 
 class profileFragment : Fragment(), View.OnClickListener {
-    public var result: List<TvShow> = listOf()
+    var result: List<TvShow> = listOf()
 
     var clickHandler = ClickListener()
 
@@ -38,7 +37,7 @@ class profileFragment : Fragment(), View.OnClickListener {
         mContext = context
     }
 
-    inner class ClickListener(): RepoListAdapter.OnItemClickListener{
+    inner class ClickListener() : RepoListAdapter.OnItemClickListener {
         override fun onItemClick(position: Int) {
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             var bundle = Bundle()
@@ -46,25 +45,26 @@ class profileFragment : Fragment(), View.OnClickListener {
             if (transaction != null) {
                 val fragment = showFragment()
                 fragment.arguments = bundle
-                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment).addToBackStack("")
+                transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
+                    .addToBackStack("")
                 transaction.commit()
             }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //this.cookie = (activity as MainActivity).getAuthCookie()
         clickHandler = ClickListener()
         super.onCreate(savedInstanceState)
 
     }
 
-    override fun onResume(){
+    override fun onResume() {
         super.onResume()
 
         var viewExtracted = view
         var recProfile = recyclerProfile
-        var refreshButtpn = refreshButtonProfile  // это нужно чтобы прилажуха при повороте не падала (проблема в асинхронщине мне кажется)
+        var refreshButton =
+            refreshButtonProfile  // это нужно чтобы прилажуха при повороте не падала (проблема в асинхронщине мне кажется)
 
         var cookie = (activity as MainActivity).getAuthCookie()
 
@@ -74,15 +74,14 @@ class profileFragment : Fragment(), View.OnClickListener {
         coroutineScope.launch {
             Log.d("coroutine", "coroutine onResumeProfile launch")
             var user = ProfileAdapter().getProfile(cookie)
-            if (user==null || user.name==null || user.name=="")
+            if (user == null || user.name == null || user.name == "")
                 drawNoUser()
-            else
-            {
+            else {
                 Log.i("profile", user.name)
                 drawUser(user, viewExtracted)
-                if(cookie!="") {
+                if (cookie != "") {
                     retrieveShows(recProfile)
-                    refreshButtpn.setOnClickListener {
+                    refreshButton.setOnClickListener {
                         retrieveShows(recProfile)
                     }
                 }
@@ -105,38 +104,35 @@ class profileFragment : Fragment(), View.OnClickListener {
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch(errorHandler) {
             var cookie = (activity as MainActivity).getAuthCookie()
-            val resultList = TvShowsRetriever().getRepositoriesUser("auth="+cookie)
+            val resultList = TvShowsRetriever().getRepositoriesUser("auth=" + cookie)
             result = resultList
             val result = RepoResult(resultList)
             recyclerProfile.adapter = RepoListAdapter(result, clickHandler)
         }
     }
 
-    private fun drawNoUser()
-    {
+    private fun drawNoUser() {
         view!!.findViewById<TextView>(R.id.profileName).setText("Anonymous")
         view!!.findViewById<TextView>(R.id.profileAge).setText("0")
-        view!!.findViewById<ImageView>(R.id.profilePicture).setImageResource(R.drawable.default_profile)
+        view!!.findViewById<ImageView>(R.id.profilePicture)
+            .setImageResource(R.drawable.default_profile)
     }
 
 
-    private fun drawUser(user: User, viewExtracted:View?)
-    {
+    private fun drawUser(user: User, viewExtracted: View?) {
         viewExtracted!!.findViewById<TextView>(R.id.profileName).setText(user.name)
         viewExtracted!!.findViewById<TextView>(R.id.profileAge).setText(user.age.toString())
-        try{
+        try {
             val imageView = viewExtracted!!.findViewById<ImageView>(R.id.profilePicture)
             Picasso.get().load(user.photoLink).into(imageView)
-        }
-        catch (e:Exception)
-        {
-            view!!.findViewById<ImageView>(R.id.profilePicture).setImageResource(R.drawable.default_profile)
+        } catch (e: Exception) {
+            view!!.findViewById<ImageView>(R.id.profilePicture)
+                .setImageResource(R.drawable.default_profile)
             Log.e("drawUSerException", e.toString())
         }
 
 
     }
-
 
 
     override fun onCreateView(
@@ -147,7 +143,7 @@ class profileFragment : Fragment(), View.OnClickListener {
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
-    override fun onClick(view:View){
+    override fun onClick(view: View) {
 
         if (view != null) {
             when (view.id) {
@@ -159,8 +155,7 @@ class profileFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun logout()
-    {
+    private fun logout() {
         (activity as MainActivity).logout()
     }
 

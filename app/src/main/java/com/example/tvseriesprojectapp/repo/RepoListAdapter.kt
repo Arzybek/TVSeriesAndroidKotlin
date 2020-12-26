@@ -27,29 +27,31 @@ class RepoListAdapter(private val repoList: RepoResult, private val listener: On
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         private val url = "http://${Session.ip}:${Session.port}/tvshows/image/";
+
         init {
             itemView.setOnClickListener(this)
         }
+
         fun bindRepo(repo: TvShow) {
             itemView.name.text = repo.name.orEmpty()
             itemView.category.text = repo.category.orEmpty()
             itemView.year.text = repo.year.toString().orEmpty()
-            if (repo.imgLink=="")
-                Picasso.get().load(url+repo.id.toString()).into(itemView.icon) // здесь можно просто грузить какую нибудь заглушку
+            if (repo.imgLink == "")
+                Picasso.get().load(url + repo.id.toString())
+                    .into(itemView.icon) // здесь можно просто грузить какую нибудь заглушку
             else
-                Picasso.get().load(url+repo.imgLink).into(itemView.icon)
-               //Picasso.get().load(url+repo.id.toString()).into(itemView.icon)
+                Picasso.get().load(url + repo.imgLink).into(itemView.icon)
         }
 
         override fun onClick(p0: View?) {
             val position = adapterPosition
             val id = repoList.items[position].id
-            if(position != RecyclerView.NO_POSITION)
+            if (position != RecyclerView.NO_POSITION)
                 listener.onItemClick(id.toInt())
         }
     }
 
-    interface OnItemClickListener{
+    interface OnItemClickListener {
         fun onItemClick(position: Int)
     }
 }

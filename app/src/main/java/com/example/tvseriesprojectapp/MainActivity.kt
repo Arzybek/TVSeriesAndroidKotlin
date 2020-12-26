@@ -5,15 +5,13 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.View
 import com.example.tvseriesprojectapp.fragments.*
-import io.ktor.util.cio.NoopContinuation.context
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
     val loginFrag = loginFragment()
     var profileFrag = profileFragment()
-    val allFragment  = allFragment()
+    val allFragment = allFragment()
     val addshowFragment = addshowFragment()
     private var jwtCookie = "";
 
@@ -24,17 +22,16 @@ class MainActivity : AppCompatActivity() {
 
         this.jwtCookie = loadAuthCookie()
 
-        bottom_navigation.setOnNavigationItemSelectedListener{
-            when (it.itemId){
-                R.id.action_login-> makeCurrentFragment(loginFrag)
-                R.id.action_profile-> makeCurrentFragment(profileFrag)
+        bottom_navigation.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.action_login -> makeCurrentFragment(loginFrag)
+                R.id.action_profile -> makeCurrentFragment(profileFrag)
                 R.id.action_all -> makeCurrentFragment(allFragment)
-                else -> 1==1
+                else -> 1 == 1
             }
             true
         }
 
-//        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
     override fun onResume() {
@@ -46,10 +43,11 @@ class MainActivity : AppCompatActivity() {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton1 -> loginFrag.onClick(v)
-//                R.id.refreshButton -> allFragment.onClick(v)
                 R.id.addShowButton -> addshowFragment.onClick(v)
                 R.id.addShowProfileButton -> makeCurrentFragment(addshowFragment)
-                R.id.logoutProfileButton -> {profileFrag.onClick(v)}
+                R.id.logoutProfileButton -> {
+                    profileFrag.onClick(v)
+                }
             }
         }
     }
@@ -61,24 +59,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun makeCurrentFragment(fragmentTag: String) = supportFragmentManager.beginTransaction().apply {
-        when (fragmentTag){
-            "loginFragment"-> replace(R.id.fl_wrapper, loginFrag).addToBackStack("tag")
-            "profileFragment"-> replace(R.id.fl_wrapper, profileFrag).addToBackStack("tag")
-            "allFragment"-> replace(R.id.fl_wrapper, allFragment).addToBackStack("tag")
+        when (fragmentTag) {
+            "loginFragment" -> replace(R.id.fl_wrapper, loginFrag).addToBackStack("tag")
+            "profileFragment" -> replace(R.id.fl_wrapper, profileFrag).addToBackStack("tag")
+            "allFragment" -> replace(R.id.fl_wrapper, allFragment).addToBackStack("tag")
             "addshowFragment" -> replace(R.id.fl_wrapper, addshowFragment).addToBackStack("tag")
         }
         commit()
     }
 
-    fun logout()
-    {
+    fun logout() {
         deleteAuthCookie()
         profileFrag = profileFragment()
         makeCurrentFragment(profileFrag)
     }
 
-    fun loadAuthCookie() : String
-    {
+    fun loadAuthCookie(): String {
         val file = File(filesDir, "cookie")
         if (file.exists())
             return file.readText()
@@ -86,8 +82,7 @@ class MainActivity : AppCompatActivity() {
             return ""
     }
 
-    fun saveAuthCookie(cookie: String)
-    {
+    fun saveAuthCookie(cookie: String) {
         val file = File(filesDir, "cookie")
         if (file.exists())
             file.delete()
@@ -95,16 +90,14 @@ class MainActivity : AppCompatActivity() {
         this.jwtCookie = cookie
     }
 
-    fun deleteAuthCookie()
-    {
+    fun deleteAuthCookie() {
         val file = File(filesDir, "cookie")
         if (file.exists())
             file.delete()
         this.jwtCookie = ""
     }
 
-    fun getAuthCookie():String
-    {
+    fun getAuthCookie(): String {
         return this.jwtCookie
     }
 }
