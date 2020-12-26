@@ -9,6 +9,7 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import java.security.PublicKey
 
 interface ProfileService {
 
@@ -17,6 +18,13 @@ interface ProfileService {
 
     @POST("/register/insecure")
     suspend fun insecureRegister(@Header("Cookie") auth: String) : String
+
+    @POST("/register")
+    suspend fun secureRegister(@Header("Cookie") auth: String) : String
+
+    @GET("/register")
+    suspend fun getRSAkey() : String
+
 
 
 

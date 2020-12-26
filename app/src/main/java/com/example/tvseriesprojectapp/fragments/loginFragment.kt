@@ -1,6 +1,5 @@
 package com.example.tvseriesprojectapp.fragments
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -12,18 +11,15 @@ import android.widget.Toast
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.repo.ProfileAdapter
-import com.example.tvseriesprojectapp.repo.ProfileService
-import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
-import io.ktor.client.HttpClient
-import io.ktor.client.features.cookies.AcceptAllCookiesStorage
-import io.ktor.client.features.cookies.HttpCookies
-import io.ktor.client.features.cookies.addCookie
-import io.ktor.client.features.cookies.cookies
-import io.ktor.client.request.post
-import io.ktor.http.Cookie
-import kotlinx.coroutines.*
-import java.io.File
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.spec.RSAPublicKeySpec
+import javax.crypto.Cipher
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -109,19 +105,77 @@ class loginFragment : Fragment(), View.OnClickListener{
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch {
             Log.d("coroutine", "coroutine tryLogin launch")
-            var data = ProfileAdapter().insecureRegister(logPass)
-            if (data=="ERROR")
+            if (Session.RSAsecure)
             {
-                val toast: Toast = Toast.makeText(view!!.context, "Wrong login or password", Toast.LENGTH_LONG);
-                toast.show()
+                Log.d("coroutine", "coroutine secureRegister")
+                secureRegister(logPass)
             }
             else
             {
-                (activity as MainActivity).saveAuthCookie(data)
-                val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
-                toast.show()
-                (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
+                Log.d("coroutine", "coroutine insecureRegister")
+                insecureRegister(logPass)
             }
+        }
+    }
+
+
+    suspend private fun insecureRegister(logPass:String)
+    {
+        var data = ProfileAdapter().insecureRegister(logPass)
+        if (data=="ERROR")
+        {
+            val toast: Toast = Toast.makeText(view!!.context, "Wrong login or password", Toast.LENGTH_LONG);
+            toast.show()
+        }
+        else
+        {
+            (activity as MainActivity).saveAuthCookie(data)
+            val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
+            toast.show()
+            (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
+        }
+    }
+
+    suspend private fun secureRegister(logPass: String)
+    {
+        var key = ProfileAdapter().getRSAkey()
+        Log.d("auth", "RSA public key: "+key)
+        var arguments = key.split("\n")
+        var modulus = ""
+        var exponent = ""
+        for(i:String in arguments)
+        {
+            var formatted = i.replace(" ", "")
+            if (formatted.startsWith("modulus"))
+            {
+                modulus = formatted.replace("modulus:", "")
+            }
+            if (formatted.startsWith("publicexponent"))
+            {
+                exponent = formatted.replace("publicexponent:","")
+            }
+
+        }
+        val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
+        val cipher: Cipher = Cipher.getInstance("RSA")
+        val pubSpec = RSAPublicKeySpec(modulus.toBigInteger(), exponent.toBigInteger())
+        val pubKey: PublicKey = keyFactory.generatePublic(pubSpec)
+        cipher.init(Cipher.ENCRYPT_MODE, pubKey)
+        val encrypted = cipher.doFinal(logPass.toByteArray())
+        val toSend = String(encrypted)
+
+        var data = ProfileAdapter().secureRegister(toSend)
+        if (data=="ERROR")
+        {
+            val toast: Toast = Toast.makeText(view!!.context, "Wrong login or password", Toast.LENGTH_LONG);
+            toast.show()
+        }
+        else
+        {
+            (activity as MainActivity).saveAuthCookie(data)
+            val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
+            toast.show()
+            (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
         }
     }
 

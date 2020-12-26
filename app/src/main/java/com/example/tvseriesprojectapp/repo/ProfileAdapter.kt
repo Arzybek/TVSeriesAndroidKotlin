@@ -6,6 +6,8 @@ import com.example.tvseriesprojectapp.user.Session
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.security.PublicKey
 
 
 class ProfileAdapter {
@@ -24,6 +26,7 @@ class ProfileAdapter {
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
 
@@ -42,6 +45,19 @@ class ProfileAdapter {
         Log.d("retrofit", "insecureRegister  "+logPass)
         var cookieToSend = "register="+logPass
         return service.insecureRegister(cookieToSend)
+    }
+
+    suspend fun getRSAkey() : String
+    {
+        Log.d("retrofit", "getRSAkey")
+        return service.getRSAkey()
+    }
+
+    suspend fun secureRegister(logpassEncrypted:String) : String
+    {
+        Log.d("retrofit", "secureRegister")
+        var cookieToSend = "register="+logpassEncrypted
+        return service.secureRegister(cookieToSend)
     }
 
 
