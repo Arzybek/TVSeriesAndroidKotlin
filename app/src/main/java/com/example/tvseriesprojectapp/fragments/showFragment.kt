@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -19,7 +18,7 @@ import android.widget.LinearLayout
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
-import com.example.tvseriesprojectapp.dto.EpisodeSerias
+import com.example.tvseriesprojectapp.dto.EpisodeSeries
 import com.example.tvseriesprojectapp.dto.TvShow
 import com.example.tvseriesprojectapp.repo.RepoListAdapterSeries
 import com.example.tvseriesprojectapp.repo.TvShowsRetriever
@@ -29,14 +28,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.toast
 import java.net.URL
 
 
 class showFragment : Fragment(), View.OnClickListener {
     private var url = "http://${Session.ip}:${Session.port}/"
     private var pos = -1;
-    var episodeSeries = EpisodeSerias(mutableListOf())
+    var episodeSeries = EpisodeSeries(mutableListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("showFrag", "onCreate")
@@ -77,84 +75,82 @@ class showFragment : Fragment(), View.OnClickListener {
     private fun drawShow(mContainer: View, show: TvShow): View {
         val linearLayout = mContainer.findViewById<LinearLayout>(R.id.testLayout)
         linearLayout.findViewById<TextView>(R.id.show_name).setText(show.name)
-        linearLayout.findViewById<TextView>(R.id.show_category).setText("Жанр: "+show.category)
-        linearLayout.findViewById<TextView>(R.id.show_year).setText("Год: "+show.year.toString())
+        linearLayout.findViewById<TextView>(R.id.show_category)
+            .setText("""Жанр: ${show.category}""")
+        linearLayout.findViewById<TextView>(R.id.show_year).setText("""Год: ${show.year}""")
         //ToDO set description
         val url = url + "tvshows/image/" + show.imgLink
         DownLoadImageTask(linearLayout.findViewById<ImageView>(R.id.show_pic))
-                .execute(url)
+            .execute(url)
 
         var mRatingBar = linearLayout.findViewById(R.id.ratingBar) as RatingBar;
 
 
-       mRatingBar.onRatingBarChangeListener =
-           RatingBar.OnRatingBarChangeListener { ratingBar, rating, fromUser ->
-               onRatingChangeAsync(ratingBar, rating, fromUser, show.id)
-
-           }
-
-        (linearLayout.findViewById(R.id.commentsButton) as Button).setOnClickListener({
-            onCommentsClick(
-                show.id
-            )
-        })
-
-        var cont = this.context
-
-            val mainActivityJob = Job()
-
-            val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
-            coroutineScope.launch {
-                Log.d("coroutine", "coroutine drawShow launch")
-                var cookie = (activity as MainActivity).getAuthCookie()
-                var isWatching = TvShowsRetriever().isWatching(show.id, cookie)
-                val addToWatchingButton = linearLayout.findViewById(R.id.showIsWatch) as Button
-                var params = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                var ratingText = (linearLayout.findViewById(R.id.show_rating) as TextView)
-                var rating = TvShowsRetriever().getShowRating(show.id)
-                var rounded = Math.round(rating * 100).toDouble()/100
-                ratingText.setText(rounded.toString())
-
-                //mRatingBar.rating = TvShowsRetriever().getUserRating(show.id, cookie)
-
-//            addToWatchingButton.x = 20.0F;
-//            addToWatchingButton.y = 0F;
-                addToWatchingButton.setTag(R.id.resourceShowID, show.id)
-                if (isWatching) {
-                    addToWatchingButton.isActivated = true
-                    addToWatchingButton.setBackgroundColor(Color.GREEN)
-                } else {
-                    addToWatchingButton.isActivated = false
-                    addToWatchingButton.setBackgroundColor(Color.GRAY)
-                }
-                addToWatchingButton.text = "Watching"
-
-                addToWatchingButton.setOnClickListener {
-                    onAddToWatchingClickAsync(addToWatchingButton);
-                }
-
-                var watchedEpisodes = TvShowsRetriever().getWatchedEpisodes(show.id, cookie)
-                val episodeView = linearLayout.findViewById<RecyclerView>(R.id.episodeView)
-                episodeView.refreshDrawableState()
-                val e = show.episodes.zip(watchedEpisodes).forEach{ pair -> pair.first.isWatched = pair.second }
-                episodeSeries = EpisodeSerias(show.episodes)
-                episodeView.layoutManager = GridLayoutManager(linearLayout.context, 5)
-                episodeView.adapter = RepoListAdapterSeries(
-                    EpisodeSerias(show.episodes), ClickListener(
-                        episodeView
-                    )
-                )
+        mRatingBar.onRatingBarChangeListener =
+            RatingBar.OnRatingBarChangeListener { ratingBar, rating, fromUser ->
+                onRatingChangeAsync(rating, show.id)
 
             }
 
-            return mContainer
+
+        (linearLayout.findViewById(R.id.commentsButton) as Button).setOnClickListener {
+            onCommentsClick(
+                show.id
+            )
         }
 
 
-    fun redraw(){
+        val mainActivityJob = Job()
+
+        val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
+        coroutineScope.launch {
+            Log.d("coroutine", "coroutine drawShow launch")
+            var cookie = (activity as MainActivity).getAuthCookie()
+            var isWatching = TvShowsRetriever().isWatching(show.id, cookie)
+            val addToWatchingButton = linearLayout.findViewById(R.id.showIsWatch) as Button
+            var params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            mRatingBar.rating = TvShowsRetriever().getUserRating(show.id, cookie);
+            var ratingText = (linearLayout.findViewById(R.id.show_rating) as TextView)
+            var rating = TvShowsRetriever().getShowRating(show.id)
+            var rounded = Math.round(rating * 100).toDouble() / 100
+            ratingText.setText(rounded.toString())
+            addToWatchingButton.setTag(R.id.resourceShowID, show.id)
+            if (isWatching) {
+                addToWatchingButton.isActivated = true
+                addToWatchingButton.setBackgroundColor(Color.GREEN)
+            } else {
+                addToWatchingButton.isActivated = false
+                addToWatchingButton.setBackgroundColor(Color.GRAY)
+            }
+            addToWatchingButton.text = "Watching"
+
+            addToWatchingButton.setOnClickListener {
+                onAddToWatchingClickAsync(addToWatchingButton);
+            }
+
+            var watchedEpisodes = TvShowsRetriever().getWatchedEpisodes(show.id, cookie)
+            val episodeView = linearLayout.findViewById<RecyclerView>(R.id.episodeView)
+            episodeView.refreshDrawableState()
+            val e = show.episodes.zip(watchedEpisodes)
+                .forEach { pair -> pair.first.isWatched = pair.second }
+            episodeSeries = EpisodeSeries(show.episodes)
+            episodeView.layoutManager = GridLayoutManager(linearLayout.context, 5)
+            episodeView.adapter = RepoListAdapterSeries(
+                EpisodeSeries(show.episodes), ClickListener(
+                    episodeView
+                )
+            )
+
+        }
+
+        return mContainer
+    }
+
+
+    fun redraw() {
         var myAdapter = episodeView.adapter
         episodeView.setAdapter(myAdapter);
         if (myAdapter != null) {
@@ -162,18 +158,15 @@ class showFragment : Fragment(), View.OnClickListener {
         };
     }
 
-    inner class ClickListener(val rv: RecyclerView): RepoListAdapterSeries.OnItemClickListener{
+    inner class ClickListener(val rv: RecyclerView) : RepoListAdapterSeries.OnItemClickListener {
         override fun onItemClick(position: Int) {
             if (currentShow == null) return
             val episode: Episode = currentShow!!.episodes[position]
 
-            if (episode.isWatched)
-            {
+            if (episode.isWatched) {
                 onEpisodeClickAsync(false, position)
                 episode.isWatched = false
-            }
-            else
-            {
+            } else {
                 onEpisodeClickAsync(true, position)
                 episode.isWatched = true
             }
@@ -224,12 +217,9 @@ class showFragment : Fragment(), View.OnClickListener {
 
 
     private fun onRatingChangeAsync(
-        ratingBar: RatingBar,
         rating: Float,
-        fromUser: Boolean,
         showID: Long
-    )
-    {
+    ) {
         val cookie = (activity as MainActivity).getAuthCookie()
         val mainActivityJob = Job()
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
@@ -240,15 +230,15 @@ class showFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun onCommentsClick(showID:Long)
-    {
+    private fun onCommentsClick(showID: Long) {
         val transaction = activity?.supportFragmentManager?.beginTransaction()
         var bundle = Bundle()
         bundle.putLong("showID", showID)
         if (transaction != null) {
             val fragment = CommentsFragment()
             fragment.arguments = bundle
-            transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment).addToBackStack("tag")
+            transaction.replace(com.example.tvseriesprojectapp.R.id.fl_wrapper, fragment)
+                .addToBackStack("tag")
             transaction.commit()
         }
     }
@@ -261,7 +251,8 @@ class showFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private class DownLoadImageTask(internal val imageView: ImageView) : AsyncTask<String, Void, Bitmap?>() {
+    private class DownLoadImageTask(internal val imageView: ImageView) :
+        AsyncTask<String, Void, Bitmap?>() {
         override fun doInBackground(vararg urls: String): Bitmap? {
             val urlOfImage = urls[0]
             return try {

@@ -1,6 +1,5 @@
 package com.example.tvseriesprojectapp.fragments
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -12,18 +11,15 @@ import android.widget.Toast
 import com.example.tvseriesprojectapp.MainActivity
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.repo.ProfileAdapter
-import com.example.tvseriesprojectapp.repo.ProfileService
-import com.example.tvseriesprojectapp.repo.TvShowsRetriever
 import com.example.tvseriesprojectapp.user.Session
-import io.ktor.client.HttpClient
-import io.ktor.client.features.cookies.AcceptAllCookiesStorage
-import io.ktor.client.features.cookies.HttpCookies
-import io.ktor.client.features.cookies.addCookie
-import io.ktor.client.features.cookies.cookies
-import io.ktor.client.request.post
-import io.ktor.http.Cookie
-import kotlinx.coroutines.*
-import java.io.File
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.spec.RSAPublicKeySpec
+import javax.crypto.Cipher
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -35,10 +31,10 @@ private const val ARG_PARAM2 = "param2"
  * Use the [loginFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class loginFragment : Fragment(), View.OnClickListener{
+class loginFragment : Fragment(), View.OnClickListener {
 
-    private var rsa:String = ""
-    private var URL:String = ""
+    private var rsa: String = ""
+    private var URL: String = ""
     //private var cookieJWT:String = ""
 
     private var ip = ""
@@ -47,6 +43,7 @@ class loginFragment : Fragment(), View.OnClickListener{
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
 
         this.ip = Session.ip!!
         this.port = Session.port
@@ -66,16 +63,17 @@ class loginFragment : Fragment(), View.OnClickListener{
     }
 
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
 
         return inflater.inflate(R.layout.fragment_login, container, false)
     }
 
 
-    fun login(v:View){
+    fun login(v: View) {
         if (v != null) {
             when (v.id) {
                 R.id.loginButton1 -> loginPressed()
@@ -95,12 +93,12 @@ class loginFragment : Fragment(), View.OnClickListener{
     private fun loginPressed() {
         val loginText: EditText = view!!.findViewById<EditText>(R.id.login)
         val passwordText: EditText = view!!.findViewById<EditText>(R.id.password)
-        Log.i("login", "data: "+loginText.text.toString()+passwordText.text.toString())
-        Log.i("Login", "url: "+url)
+        Log.i("login", "data: " + loginText.text.toString() + passwordText.text.toString())
+        Log.i("Login", "url: " + url)
 
-        val logPass = loginText.text.toString()+":"+passwordText.text.toString()
+        val logPass = loginText.text.toString() + ":" + passwordText.text.toString()
 
-        Log.i("Login", "LogPass: "+logPass)
+        Log.i("Login", "LogPass: " + logPass)
 
 
         val mainActivityJob = Job()
@@ -108,39 +106,68 @@ class loginFragment : Fragment(), View.OnClickListener{
         val coroutineScope = CoroutineScope(mainActivityJob + Dispatchers.Main)
         coroutineScope.launch {
             Log.d("coroutine", "coroutine tryLogin launch")
-            var data = ProfileAdapter().insecureRegister(logPass)
-            if (data=="ERROR")
-            {
-                val toast: Toast = Toast.makeText(view!!.context, "Wrong login or password", Toast.LENGTH_LONG);
-                toast.show()
-            }
-            else
-            {
-                (activity as MainActivity).saveAuthCookie(data)
-                val toast: Toast = Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
-                toast.show()
-                (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
+            if (Session.RSASecure) {
+                Log.d("coroutine", "coroutine secureRegister")
+                secureRegister(logPass)
+            } else {
+                Log.d("coroutine", "coroutine insecureRegister")
+                insecureRegister(logPass)
             }
         }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment loginFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-                loginFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(ARG_PARAM1, param1)
-                        putString(ARG_PARAM2, param2)
-                    }
-                }
+
+    suspend private fun insecureRegister(logPass: String) {
+        var data = ProfileAdapter().insecureRegister(logPass)
+        if (data == "ERROR") {
+            val toast: Toast =
+                Toast.makeText(view!!.context, "Wrong login or password", Toast.LENGTH_LONG);
+            toast.show()
+        } else {
+            (activity as MainActivity).saveAuthCookie(data)
+            val toast: Toast =
+                Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
+            toast.show()
+            (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
+        }
     }
+
+    suspend private fun secureRegister(logPass: String) {
+        var key = ProfileAdapter().getRSAkey()
+        Log.d("auth", "RSA public key: " + key)
+        var arguments = key.split("\n")
+        var modulus = ""
+        var exponent = ""
+        for (i: String in arguments) {
+            var formatted = i.replace(" ", "")
+            if (formatted.startsWith("modulus")) {
+                modulus = formatted.replace("modulus:", "")
+            }
+            if (formatted.startsWith("publicexponent")) {
+                exponent = formatted.replace("publicexponent:", "")
+            }
+
+        }
+        val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
+        val cipher: Cipher = Cipher.getInstance("RSA")
+        val pubSpec = RSAPublicKeySpec(modulus.toBigInteger(), exponent.toBigInteger())
+        val pubKey: PublicKey = keyFactory.generatePublic(pubSpec)
+        cipher.init(Cipher.ENCRYPT_MODE, pubKey)
+        val encrypted = cipher.doFinal(logPass.toByteArray())
+        val toSend = String(encrypted)
+
+        var data = ProfileAdapter().secureRegister(toSend)
+        if (data == "ERROR") {
+            val toast: Toast =
+                Toast.makeText(view!!.context, "Wrong login or password", Toast.LENGTH_LONG);
+            toast.show()
+        } else {
+            (activity as MainActivity).saveAuthCookie(data)
+            val toast: Toast =
+                Toast.makeText(view!!.context, "Successful login!", Toast.LENGTH_LONG);
+            toast.show()
+            (activity as MainActivity?)?.makeCurrentFragment("profileFragment")
+        }
+    }
+
 }

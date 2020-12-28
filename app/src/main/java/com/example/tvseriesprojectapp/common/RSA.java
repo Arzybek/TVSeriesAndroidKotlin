@@ -3,11 +3,7 @@ package com.example.tvseriesprojectapp.common;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,7 +11,6 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -26,8 +21,6 @@ public class RSA {
     private PublicKey publicKey;
 
     public RSA() throws NoSuchAlgorithmException {
-
-
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(1024);
         KeyPair pair = keyGen.generateKeyPair();
@@ -38,7 +31,6 @@ public class RSA {
     public void writeToFile(String path, byte[] key) throws IOException {
         File f = new File(path);
         f.getParentFile().mkdirs();
-
         FileOutputStream fos = new FileOutputStream(f);
         fos.write(key);
         fos.flush();
@@ -55,9 +47,9 @@ public class RSA {
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static PublicKey getPublicKeyBase(String base64PublicKey){
+    public static PublicKey getPublicKeyBase(String base64PublicKey) {
         PublicKey publicKey = null;
-        try{
+        try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(base64PublicKey.getBytes()));
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             publicKey = keyFactory.generatePublic(keySpec);
@@ -69,12 +61,12 @@ public class RSA {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static PublicKey getPublicKey(String pubKey){
+    public static PublicKey getPublicKey(String pubKey) {
         return getPublicKeyBase(Base64.getEncoder().encodeToString(pubKey.getBytes()));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static PrivateKey getPrivateKeyBase(String base64PrivateKey){
+    public static PrivateKey getPrivateKeyBase(String base64PrivateKey) {
         PrivateKey privateKey = null;
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64PrivateKey.getBytes()));
         KeyFactory keyFactory = null;

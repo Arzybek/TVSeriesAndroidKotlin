@@ -21,7 +21,7 @@ class TvShowsRetriever {
         private var cookies: List<okhttp3.Cookie>? = null
 
         override fun saveFromResponse(url: HttpUrl, cookies: MutableList<okhttp3.Cookie>) {
-                this.cookies = cookies
+            this.cookies = cookies
         }
 
         override fun loadForRequest(url: HttpUrl): MutableList<okhttp3.Cookie> {
@@ -38,121 +38,112 @@ class TvShowsRetriever {
     init {
 
         val gson = GsonBuilder()
-                .setLenient()
-                .create()
-        // 2
+            .setLenient()
+            .create()
+
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create()) //important
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-//            .client(OkHttpClient().newBuilder().cookieJar(SessionCookieJar()).build())
+            .addConverterFactory(ScalarsConverterFactory.create()) //important
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
 
 
         service = retrofit.create(TvSeriesService::class.java)
     }
 
-    suspend fun getRepositories(): List<List<TvShow>>  {
+    suspend fun getRepositories(): List<List<TvShow>> {
         return service.searchRepositories(maxPerPage)
     }
 
-    suspend fun getRepositoriesUser(str: String): List<TvShow>  {
+    suspend fun getRepositoriesUser(str: String): List<TvShow> {
         return service.searchRepositoriesUser(str)
     }
 
-    suspend fun searchRepositoriesByName(str: String): List<List<TvShow>>  {
+    suspend fun searchRepositoriesByName(str: String): List<List<TvShow>> {
         return service.searchRepositoriesByName(str)
     }
 
-    suspend fun getShow(showID:Long) : TvShow
-    {
-        Log.d("retrofit", "getShow "+showID.toString())
+    suspend fun getShow(showID: Long): TvShow {
+        Log.d("retrofit", "getShow " + showID.toString())
         return service.getShow(showID)
     }
 
 
-    suspend fun watchingShow(showID: Long, cookie:String)
-    {
-        Log.d("retrofit", "watchingShow "+showID.toString()+" "+cookie)
-        var cookieToSend = "auth="+cookie
+    suspend fun watchingShow(showID: Long, cookie: String) {
+        Log.d("retrofit", "watchingShow " + showID.toString() + " " + cookie)
+        var cookieToSend = "auth=" + cookie
         service.watchingShow(showID.toString(), cookieToSend)
     }
 
-    suspend fun unwatchingShow(showID: Long, cookie:String)
-    {
-        Log.d("retrofit", "unwatchingShow "+showID.toString()+" "+cookie)
-        var cookieToSend = "auth="+cookie
+    suspend fun unwatchingShow(showID: Long, cookie: String) {
+        Log.d("retrofit", "unwatchingShow " + showID.toString() + " " + cookie)
+        var cookieToSend = "auth=" + cookie
         service.unwatchingShow(showID.toString(), cookieToSend)
     }
 
 
-    suspend fun watchingEpisode(showID: Long, episodeID:Long, cookie:String)
-    {
-        Log.d("retrofit", "watchingEpisode "+showID.toString()+" "+episodeID.toString()+" "+cookie)
-        var cookieToSend = "auth="+cookie
+    suspend fun watchingEpisode(showID: Long, episodeID: Long, cookie: String) {
+        Log.d(
+            "retrofit",
+            "watchingEpisode " + showID.toString() + " " + episodeID.toString() + " " + cookie
+        )
+        var cookieToSend = "auth=" + cookie
         service.watchingEpisode(showID.toString(), episodeID.toString(), cookieToSend)
     }
 
-    suspend fun unwatchingEpisode(showID: Long, episodeID:Long, cookie:String)
-    {
-        Log.d("retrofit", "unwatchingEpisode "+showID.toString()+" "+episodeID.toString()+" "+cookie)
-        var cookieToSend = "auth="+cookie
+    suspend fun unwatchingEpisode(showID: Long, episodeID: Long, cookie: String) {
+        Log.d(
+            "retrofit",
+            "unwatchingEpisode " + showID.toString() + " " + episodeID.toString() + " " + cookie
+        )
+        var cookieToSend = "auth=" + cookie
         service.unwatchingEpisode(showID.toString(), episodeID.toString(), cookieToSend)
     }
 
-    suspend fun isWatching(showID: Long, cookie:String):Boolean
-    {
-        Log.d("retrofit", "isWatching "+showID.toString()+" "+cookie)
-        var cookieToSend = "auth="+cookie
+    suspend fun isWatching(showID: Long, cookie: String): Boolean {
+        Log.d("retrofit", "isWatching " + showID.toString() + " " + cookie)
+        var cookieToSend = "auth=" + cookie
         return service.isWatchingShow(showID.toString(), cookieToSend)
     }
 
-    suspend fun getWatchedEpisodes(showID: Long, cookie:String):List<Boolean>
-    {
-        var cookieToSend = "auth="+cookie
-        Log.d("retrofit", "getWatchedEpisodes "+showID.toString()+" "+cookieToSend)
+    suspend fun getWatchedEpisodes(showID: Long, cookie: String): List<Boolean> {
+        var cookieToSend = "auth=" + cookie
+        Log.d("retrofit", "getWatchedEpisodes " + showID.toString() + " " + cookieToSend)
         return service.getWatchedEpisodes(showID.toString(), cookieToSend).toList()
     }
 
-    suspend fun addUserShow(showData:String, cookie:String)
-    {
-        Log.d("retrofit", "addUserShow "+showData+" "+cookie)
-        var cookieToSend = "auth="+cookie
+    suspend fun addUserShow(showData: String, cookie: String) {
+        Log.d("retrofit", "addUserShow " + showData + " " + cookie)
+        var cookieToSend = "auth=" + cookie
         service.addUserShow(showData, cookieToSend)
     }
 
-    suspend public fun ratingShow(rating:Float, showID: Long, cookie:String)
-    {
-        var cookieToSend = "auth="+cookie
+    suspend public fun ratingShow(rating: Float, showID: Long, cookie: String) {
+        var cookieToSend = "auth=" + cookie
         service.rateShow(rating.toString(), showID.toString(), cookieToSend)
     }
 
-    suspend public fun getUserRating(showID: Long, cookie:String):Float
-    {
-        var cookieToSend = "auth="+cookie
+    suspend public fun getUserRating(showID: Long, cookie: String): Float {
+        var cookieToSend = "auth=" + cookie
         return service.getUserRating(showID.toString(), cookieToSend)
     }
 
-    suspend public fun sendReview(review:String, showID: Long, cookie:String)
-    {
-        var cookieToSend = "auth="+cookie
+    suspend public fun sendReview(review: String, showID: Long, cookie: String) {
+        var cookieToSend = "auth=" + cookie
         service.reviewShow(review, showID.toString(), cookieToSend)
     }
 
-    suspend public fun getReview(showID: Long, cookie:String):String
-    {
-        var cookieToSend = "auth="+cookie
+    suspend public fun getReview(showID: Long, cookie: String): String {
+        var cookieToSend = "auth=" + cookie
         return service.getUserReview(showID.toString(), cookieToSend)
     }
 
-    suspend public fun getShowRating(showID: Long):Float
-    {
+    suspend public fun getShowRating(showID: Long): Float {
         return service.getShowRating(showID.toString());
     }
 
-    suspend public fun getRandomReviews(amount:Int, showID: Long):ArrayList<String>
-    {
+    suspend public fun getRandomReviews(amount: Int, showID: Long): ArrayList<String> {
         return service.getRandomReviews(amount.toString(), showID.toString());
     }
 }

@@ -7,10 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.tvseriesprojectapp.R
 import com.example.tvseriesprojectapp.dto.Episode
-import com.example.tvseriesprojectapp.dto.EpisodeSerias
+import com.example.tvseriesprojectapp.dto.EpisodeSeries
 import kotlinx.android.synthetic.main.episode.view.*
 
-class RepoListAdapterSeries(private val repoList: EpisodeSerias, private val listener: OnItemClickListener) :
+class RepoListAdapterSeries(
+    private val repoList: EpisodeSeries,
+    private val listener: OnItemClickListener
+) :
     RecyclerView.Adapter<RepoListAdapterSeries.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,27 +32,27 @@ class RepoListAdapterSeries(private val repoList: EpisodeSerias, private val lis
         init {
             itemView.setOnClickListener(this)
         }
+
         fun bindRepo(repo: Episode) {
             itemView.seriesName.text = repo.episodeName.toString().orEmpty()
-            if (repo.isWatched){
+            if (repo.isWatched) {
                 itemView.setBackgroundColor(Color.GREEN)
                 //todo Change color
-            } else
-            {
+            } else {
                 itemView.setBackgroundColor(0)
             }
         }
 
         override fun onClick(p0: View?) {
             val position = adapterPosition
-            if(position != RecyclerView.NO_POSITION) {
+            if (position != RecyclerView.NO_POSITION) {
                 listener.onItemClick(position)
                 itemView.refreshDrawableState()
             }
         }
     }
 
-    interface OnItemClickListener{
+    interface OnItemClickListener {
         fun onItemClick(position: Int)
     }
 }

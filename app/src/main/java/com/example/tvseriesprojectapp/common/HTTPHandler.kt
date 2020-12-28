@@ -5,23 +5,21 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 
 class HTTPHandler {
 
-    var url:String = ""
+    var url: String = ""
 
-    constructor(url:String) {
+    constructor(url: String) {
         this.url = url
     }
 
-    fun sendGet():String {
+    fun sendGet(): String {
         val obj = URL(url)
 
         with(obj.openConnection() as HttpURLConnection) {
             // optional default is GET
             requestMethod = "GET"
-
 
             println("\nSending 'GET' request to URL : $url")
             println("Response Code : $responseCode")
@@ -40,7 +38,7 @@ class HTTPHandler {
     }
 
 
-    fun sendPostRequest(payload:String):String {
+    fun sendPostRequest(payload: String): String {
 
         val mURL = URL(url)
 
